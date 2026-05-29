@@ -1,0 +1,160 @@
+// ==========================================
+// 1. GENERATOR & DATASOURCE CONFIGURATION
+// ==========================================
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// 2. ENUMERATED TYPES
+// ==========================================
+
+/// Defines the global authorization access levels within the application platform.
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+/// Represents the deterministic lifecycle states of a consultation booking.
+enum AppointmentStatus {
+  SCHEDULED
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+// ==========================================
+// 3. CORE IDENTITY MODELS
+// ==========================================
+
+/// Central account identity record synced uniquely with the Clerk external authentication provider.
+model User {
+  id              String    @id 
+  email           String    @unique
+  role            Role      @default(PATIENT)
+  isApproved      Boolean   @default(false)
+  createdByAdmin  Boolean   @default(false)
+  lastLoginAt     DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  patientProfile  PatientProfile?
+  doctorProfile   DoctorProfile?
+  notifications   Notification[]
+}
+
+// ==========================================
+// 4. PROFILE & CLINICAL DATA MODELS
+// ==========================================
+
+/// Stores the personal demographic identity data belonging to a registered patient.
+model PatientProfile {
+  id       Int    @id @default(autoincrement())
+  userId   String @unique 
+  name             String
+  birthday         DateTime @db.Timestamptz
+  sex              String?
+  contactNumber    String?
+  address          String?
+  occupation       String?
+  profilePicture   String?
+  
+  medicalRecord    MedicalRecord?
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments     Appointment[]
+}
+
+/// Isolated Electronic Medical Record (EMR) container holding sensitive, protected patient clinical data.
+model MedicalRecord {
+  id                  Int       @id @default(autoincrement())
+  patientProfileId    Int       @unique
+  medicalRecordNo     String?   @unique
+  dateOfAdmission     DateTime? @db.Timestamptz
+  
+  weight              Float?
+  height              Float?
+  bloodType           String? 
+  
+  ongoingConcerns     String?
+  allergies           String?
+  medicationHistory   String?
+  pastMedicalHistory  String[]  @default([])
+  pastSurgicalHistory String?
+  familyHistory       String?
+  personalHistory     String?
+
+  patientProfile      PatientProfile @relation(fields: [patientProfileId], references: [id], onDelete: Cascade)
+}
+
+/// Stores professional licensing credentials, verification markers, and clinic schedules for practitioners.
+model DoctorProfile {
+  id       Int    @id @default(autoincrement())
+  userId   String @unique 
+  name               String
+  gender             String?
+  profilePicture     String?
+  
+  // Professional Details
+  specialization     String
+  subSpecializations String[] @default([])
+  bio                String?
+  hmoAccreditations  String[] @default([])
+  
+  // Contact & Logistics
+  phoneNumber        String?
+  roomNumber         String?
+  clinicDays         String[] @default([])
+  clinicHours        String?  // Consider shifting to an Enum later
+  availability       Float[]  @default([])
+  
+  // App Metrics
+  rating             Float?   @default(0)
+  totalConsultations Int      @default(0)
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments       Appointment[]
+}
+
+// ==========================================
+// 5. TRANSACTIONAL & OPERATIONAL MODELS
+// ==========================================
+
+/// Relational transaction ledger capturing a single diagnostic booking event linking a patient and a doctor.
+model Appointment {
+  id            Int               @id @default(autoincrement())
+  patientId     Int
+  doctorId      Int
+  datetime      DateTime          @db.Timestamptz
+  status        AppointmentStatus @default(SCHEDULED)
+  meetingRoomId String?           
+  notes         String?
+  prescription  String?
+  createdAt     DateTime          @default(now()) @db.Timestamptz
+  updatedAt     DateTime          @updatedAt @db.Timestamptz
+
+  patient       PatientProfile    @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor        DoctorProfile     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([doctorId])
+}
+
+/// In-app transactional alert records tracking systemic status flags and communication updates.
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    String 
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
