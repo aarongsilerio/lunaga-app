@@ -46,7 +46,7 @@ export default function MarketingLayout({
 
             {/* Displayed only when the user IS logged in */}
             <Show when="signed-in">
-              <Link href="/dashboard">
+              <Link href="/patient/dashboard">
                 <Button variant="outline" className="mr-2 rounded-full border-[#6FAEE7]/30 text-[#1E3A5F] hover:bg-[#6FAEE7]/10">
                   Go to Dashboard
                 </Button>
