@@ -1,125 +1,207 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Moon } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Send, Moon, AlertCircle, CalendarDays, ChevronRight } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
-type Message = {
-  id: string;
-  role: "user" | "luna";
-  content: string;
-};
+type Message = { id: string; role: "user" | "assistant"; content: string };
 
 export default function LunaMatchChat() {
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "1",
-      role: "luna",
-      content: "Hello. I'm Luna. I'm here to help you find the right care. Can you describe what you're feeling today?"
-    }
+      id: "welcome-msg",
+      role: "assistant",
+      content: "Hello. I am Luna, your intelligent care assistant. Can you describe how you are feeling or what symptoms you are experiencing today?",
+    },
   ]);
 
-  // Auto-scroll to bottom when a new message appears
+  // FIX: Hydrate state from sessionStorage if the user clicked "Expand" from the dashboard widget
+  useEffect(() => {
+    const savedChat = sessionStorage.getItem("luna_chat_history");
+    if (savedChat) {
+      setMessages(JSON.parse(savedChat));
+    }
+  }, []);
+
+  // FIX: Save state back to sessionStorage so it stays synced if they return to the dashboard
+  useEffect(() => {
+    if (messages.length > 1) {
+      sessionStorage.setItem("luna_chat_history", JSON.stringify(messages));
+    }
+  }, [messages]);
+  
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
-  }, [messages, isTyping]);
+  }, [messages, isLoading]);
 
-  const handleSend = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    const userMsg: Message = { id: Date.now().toString(), role: "user", content: input };
-    setMessages(prev => [...prev, userMsg]);
+    const userMessage: Message = { id: Date.now().toString(), role: "user", content: input };
+    const newMessages = [...messages, userMessage];
+    
+    setMessages(newMessages);
     setInput("");
-    setIsTyping(true);
+    setIsLoading(true);
+    setError(false);
 
-    // TODO: Replace this timeout with a real fetch() to your /api/lunamatch endpoint
-    setTimeout(() => {
-      const lunaMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "luna",
-        content: "Thank you for sharing that. Based on your symptoms, I recommend speaking with a General Physician. I found 3 available doctors who can help you feel better. Would you like to see their schedules?"
-      };
-      setMessages(prev => [...prev, lunaMsg]);
-      setIsTyping(false);
-    }, 1500);
-  };
+    try {
+      const response = await fetch("/api/lunamatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      if (!response.ok) throw new Error("Network response was not ok");
+      
+      const data = await response.json();
+      
+      setMessages((prev) => [
+        ...prev,
+        { id: (Date.now() + 1).toString(), role: "assistant", content: data.text },
+      ]);
+    } catch (err) {
+      console.error(err);
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
-    <div className="max-w-3xl mx-auto h-[80vh] flex flex-col animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto h-[85vh] flex flex-col animate-in fade-in duration-700">
       
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-[#1E3A5F]">LunaMatch</h1>
-        <p className="text-sm text-[#1E3A5F]/70">Intelligent, symptom-based doctor discovery.</p>
+        <h1 className="text-3xl font-bold text-[#1E3A5F] flex items-center justify-center gap-2">
+          <Moon className="w-8 h-8 text-[#6FAEE7]" /> LunaMatch AI
+        </h1>
+        <p className="text-[#1E3A5F]/70 mt-2">Powered by Gemini. Free, intelligent symptom discovery.</p>
       </div>
 
-      <Card className="flex-1 flex flex-col border-none shadow-md rounded-2xl overflow-hidden bg-white">
+      <Card className="flex-1 flex flex-col border border-[#6FAEE7]/20 shadow-lg rounded-3xl overflow-hidden bg-white/50 backdrop-blur-sm">
         
-        {/* Chat Area */}
-        <ScrollArea className="flex-1 p-6" ref={scrollRef}>
-          <div className="space-y-6">
+        <div className="flex-1 p-6 overflow-y-auto" ref={scrollRef}>
+          <div className="space-y-6 pb-4">
+            
             {messages.map((msg) => (
               <div key={msg.id} className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 
-                {msg.role === "luna" && (
-                  <Avatar className="h-10 w-10 border border-[#6FAEE7]/20 shadow-sm">
-                    <AvatarFallback className="bg-[#F7FAFC]">
+                {msg.role === "assistant" && (
+                  <Avatar className="h-10 w-10 border-2 border-[#F7FAFC] shadow-sm shrink-0">
+                    <AvatarFallback className="bg-[#1E3A5F] text-white">
                       <Moon className="h-5 w-5 text-[#6FAEE7]" />
                     </AvatarFallback>
                   </Avatar>
                 )}
 
-                <div className={`max-w-[75%] rounded-2xl px-5 py-3 text-sm leading-relaxed ${
+                <div className={`max-w-[80%] rounded-2xl px-6 py-4 text-sm leading-relaxed shadow-sm ${
                   msg.role === "user" 
                     ? "bg-[#1E3A5F] text-white rounded-br-none" 
-                    : "bg-[#F7FAFC] border border-[#6FAEE7]/10 text-[#1E3A5F] rounded-bl-none"
+                    : "bg-white border border-[#6FAEE7]/10 text-[#1E3A5F] rounded-bl-none"
                 }`}>
-                  {msg.content}
+                  {msg.role === "assistant" ? (
+                    
+                    /* Removed the global prose link styles so our custom buttons don't inherit them */
+                    <div className="prose prose-sm prose-p:leading-relaxed prose-strong:text-[#1E3A5F]">
+                      <ReactMarkdown
+                        components={{
+                          // Intercept all <a> tags generated by the AI
+                          a: ({ node, href, children, ...props }) => {
+                            const isBookingLink = href?.includes("/patient/doctors/");
+                            
+                            // If it's a doctor booking link, render a beautiful CTA button
+                            if (isBookingLink) {
+                              return (
+                                <Link 
+                                  href={href!} 
+                                  className="inline-flex items-center gap-2 mt-3 px-5 py-2.5 bg-[#F7FAFC] text-[#1E3A5F] border border-[#6FAEE7]/30 rounded-xl font-semibold hover:bg-[#1E3A5F] hover:text-white transition-all duration-300 shadow-sm !no-underline group w-fit"
+                                >
+                                  <CalendarDays className="w-4 h-4 text-[#6FAEE7] group-hover:text-white transition-colors shrink-0" />
+                                  {children}
+                                  <ChevronRight className="w-4 h-4 ml-1 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all shrink-0" />
+                                </Link>
+                              );
+                            }
+
+                            // Otherwise, render a normal blue text link
+                            return (
+                              <a href={href} {...props} className="text-[#6FAEE7] font-semibold hover:underline">
+                                {children}
+                              </a>
+                            );
+                          }
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
             
-            {isTyping && (
-              <div className="flex gap-4 justify-start">
-                <Avatar className="h-10 w-10 border border-[#6FAEE7]/20 shadow-sm">
-                   <AvatarFallback className="bg-[#F7FAFC]"><Moon className="h-5 w-5 text-[#6FAEE7]" /></AvatarFallback>
+            {isLoading && (
+              <div className="flex gap-4 justify-start animate-pulse">
+                <Avatar className="h-10 w-10 border-2 border-[#F7FAFC] shadow-sm shrink-0">
+                   <AvatarFallback className="bg-[#1E3A5F]"><Moon className="h-5 w-5 text-[#6FAEE7]" /></AvatarFallback>
                 </Avatar>
-                <div className="bg-[#F7FAFC] border border-[#6FAEE7]/10 rounded-2xl rounded-bl-none px-5 py-4 flex gap-1 items-center">
+                <div className="bg-white border border-[#6FAEE7]/10 rounded-2xl rounded-bl-none px-5 py-4 flex gap-1.5 items-center shadow-sm">
                   <span className="h-2 w-2 bg-[#6FAEE7]/60 rounded-full animate-bounce"></span>
                   <span className="h-2 w-2 bg-[#6FAEE7]/60 rounded-full animate-bounce delay-150"></span>
                   <span className="h-2 w-2 bg-[#6FAEE7]/60 rounded-full animate-bounce delay-300"></span>
                 </div>
               </div>
             )}
-          </div>
-        </ScrollArea>
 
-        {/* Input Area */}
+            {error && (
+              <div className="flex justify-center">
+                <div className="bg-red-50 text-red-600 text-sm px-4 py-2 rounded-full border border-red-100 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" /> Connection error. Please check your API key or try again.
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="p-4 bg-white border-t border-[#6FAEE7]/10">
-          <form onSubmit={handleSend} className="flex gap-2">
+          <form onSubmit={handleSubmit} className="flex gap-3 max-w-4xl mx-auto">
             <Input 
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Describe your symptoms..."
-              className="flex-1 rounded-full bg-[#F7FAFC] border-[#6FAEE7]/20 focus-visible:ring-[#6FAEE7]/50 h-12 px-6"
+              placeholder="E.g., I've been having severe chest pains..."
+              className="flex-1 rounded-full bg-[#F7FAFC] border-[#6FAEE7]/20 focus-visible:ring-[#6FAEE7]/50 h-14 px-6 text-base shadow-inner"
+              disabled={isLoading}
             />
-            <Button type="submit" size="icon" className="h-12 w-12 rounded-full bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 shadow-sm transition-transform hover:scale-105" disabled={!input.trim() || isTyping}>
+            <Button 
+              type="submit" 
+              size="icon" 
+              className="h-14 w-14 rounded-full bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 shadow-md transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shrink-0" 
+              disabled={!input.trim() || isLoading}
+            >
               <Send className="h-5 w-5 text-white" />
             </Button>
           </form>
         </div>
       </Card>
-
     </div>
   );
 }

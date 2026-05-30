@@ -127,34 +127,30 @@ model DoctorProfile {
 
 /// Relational transaction ledger capturing a single diagnostic booking event linking a patient and a doctor.
 model Appointment {
-  id            Int               @id @default(autoincrement())
+  id            String            @id @default(cuid())
   patientId     Int
   doctorId      Int
   datetime      DateTime          @db.Timestamptz
-  status        AppointmentStatus @default(SCHEDULED)
-  meetingRoomId String?           
-  notes         String?
-  prescription  String?
-  createdAt     DateTime          @default(now()) @db.Timestamptz
-  updatedAt     DateTime          @updatedAt @db.Timestamptz
+  status        String            @default("SCHEDULED")
+  reason        String?          
+  meetingLink     String?  // For online consultations
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  patient       PatientProfile    @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  doctor        DoctorProfile     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-
-  @@index([patientId])
-  @@index([doctorId])
+  patient         PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor          DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
 }
 
 /// In-app transactional alert records tracking systemic status flags and communication updates.
 model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    String 
-  message   String
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now()) @db.Timestamptz
+  id          String   @id @default(cuid())
+  userId      String   // The Clerk User ID receiving the notification
+  title       String   @default("System Update")
+  message     String
+  isRead      Boolean  @default(false)
+  type        String   @default("INFO") 
+  createdAt   DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

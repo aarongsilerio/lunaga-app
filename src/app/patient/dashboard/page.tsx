@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Video } from "lucide-react";
+import { LunaWidget } from "@/components/chat/luna-widget";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PatientInfoCard } from "@/components/dashboard/patient-info-card";
@@ -46,7 +47,7 @@ export default async function PatientDashboard() {
 
       {/* Main Grid Layout */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        
+        <LunaWidget />
         {/* Up Next Card */}
         <Card className="col-span-1 lg:col-span-2 border-none bg-white shadow-sm rounded-2xl">
           <CardHeader>
@@ -116,8 +117,8 @@ export default async function PatientDashboard() {
             <PatientInfoCard profile={patientProfile} />
           </div>
         )}
-
       </div>
+      
     </div>
   );
 }
