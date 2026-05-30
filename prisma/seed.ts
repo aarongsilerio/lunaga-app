@@ -73,7 +73,7 @@ async function main() {
       name: 'Dr. Alejandro Santos, MD',
       gender: 'Male',
       specialization: 'Cardiology',
-      profilePicture: 'null', 
+      profilePicture: null, 
       subSpecializations: ['Interventional Cardiology', 'Echocardiography'],
       bio: 'Board-certified cardiologist dedicated to preventative cardiovascular wellness and advanced clinical interventions.',
       hmoAccreditations: ['Maxicare', 'MediCard', 'Intellicare'],
@@ -93,7 +93,7 @@ async function main() {
       name: 'Dr. Beatrice Reyes, MD',
       gender: 'Female',
       specialization: 'Pediatrics',
-      profilePicture: 'null',
+      profilePicture: null,
       subSpecializations: ['Pediatric Allergy', 'Neonatology'],
       bio: 'Compassionate pediatrician focusing on comprehensive developmental tracking and childhood immunological profiles.',
       hmoAccreditations: ['Maxicare', 'PhilHealth', 'Caritas Health Shield'],
@@ -113,7 +113,7 @@ async function main() {
       name: 'Dr. Christian Cruz, MD',
       gender: 'Male',
       specialization: 'General Medicine',
-      profilePicture: 'null',
+      profilePicture: null,
       subSpecializations: [],
       bio: 'General practitioner prioritizing holistic family health, accessible primary diagnostics, and community triage care.',
       hmoAccreditations: ['MediCard'],
@@ -139,7 +139,7 @@ async function main() {
       contactNumber: '+639051112222',
       address: '123 Rizal Avenue, Taytay, Rizal',
       occupation: 'Software Engineer',
-      profilePicture: 'null',
+      profilePicture: null,
     },
   });
 
@@ -152,7 +152,7 @@ async function main() {
       contactNumber: '+639063334444',
       address: '456 Mabini St, Pasig City, Metro Manila',
       occupation: 'Graphic Designer',
-      profilePicture: 'null',
+      profilePicture: null,
     },
   });
 
@@ -165,7 +165,7 @@ async function main() {
       contactNumber: '+639075556666',
       address: '789 Luna Compound, Antipolo, Rizal',
       occupation: 'Agricultural Coordinator',
-      profilePicture: 'null',
+      profilePicture: null,
     },
   });
 
