@@ -73,6 +73,7 @@ async function main() {
       name: 'Dr. Alejandro Santos, MD',
       gender: 'Male',
       specialization: 'Cardiology',
+      profilePicture: 'null', 
       subSpecializations: ['Interventional Cardiology', 'Echocardiography'],
       bio: 'Board-certified cardiologist dedicated to preventative cardiovascular wellness and advanced clinical interventions.',
       hmoAccreditations: ['Maxicare', 'MediCard', 'Intellicare'],
@@ -92,6 +93,7 @@ async function main() {
       name: 'Dr. Beatrice Reyes, MD',
       gender: 'Female',
       specialization: 'Pediatrics',
+      profilePicture: 'null',
       subSpecializations: ['Pediatric Allergy', 'Neonatology'],
       bio: 'Compassionate pediatrician focusing on comprehensive developmental tracking and childhood immunological profiles.',
       hmoAccreditations: ['Maxicare', 'PhilHealth', 'Caritas Health Shield'],
@@ -111,6 +113,7 @@ async function main() {
       name: 'Dr. Christian Cruz, MD',
       gender: 'Male',
       specialization: 'General Medicine',
+      profilePicture: 'null',
       subSpecializations: [],
       bio: 'General practitioner prioritizing holistic family health, accessible primary diagnostics, and community triage care.',
       hmoAccreditations: ['MediCard'],
@@ -136,6 +139,7 @@ async function main() {
       contactNumber: '+639051112222',
       address: '123 Rizal Avenue, Taytay, Rizal',
       occupation: 'Software Engineer',
+      profilePicture: 'null',
     },
   });
 
@@ -148,6 +152,7 @@ async function main() {
       contactNumber: '+639063334444',
       address: '456 Mabini St, Pasig City, Metro Manila',
       occupation: 'Graphic Designer',
+      profilePicture: 'null',
     },
   });
 
@@ -160,6 +165,7 @@ async function main() {
       contactNumber: '+639075556666',
       address: '789 Luna Compound, Antipolo, Rizal',
       occupation: 'Agricultural Coordinator',
+      profilePicture: 'null',
     },
   });
 
@@ -230,24 +236,24 @@ async function main() {
         doctorId: docProfile1.id,
         datetime: new Date('2026-06-02T10:00:00Z'),
         status: 'SCHEDULED',
-        meetingRoomId: 'room-lunaroom-abc123xyz',
-        notes: 'Routine cardiovascular evaluation regarding stress-induced palpitations.',
+        meetingLink: 'room-lunaroom-abc123xyz',
+        reason: 'Routine cardiovascular evaluation regarding stress-induced palpitations.',
       },
       {
         patientId: patProfile2.id,
         doctorId: docProfile2.id,
         datetime: new Date('2026-06-04T14:30:00Z'),
         status: 'PENDING',
-        meetingRoomId: null,
-        notes: 'Consultation booking request regarding seasonal immunology panel adjustments.',
+        meetingLink: null,
+        reason: 'Consultation booking request regarding seasonal immunology panel adjustments.',
       },
       {
         patientId: patProfile3.id,
         doctorId: docProfile1.id,
         datetime: new Date('2025-12-15T09:00:00Z'),
         status: 'COMPLETED',
-        meetingRoomId: 'room-lunaroom-oldsession',
-        notes: 'Initial blood pressure baseline analysis.',
+        meetingLink: 'room-lunaroom-oldsession',
+        reason: 'Initial blood pressure baseline analysis.',
         prescription: 'Amlodipine 5mg once daily every morning. Re-evaluate metrics in six months.',
       },
     ],
@@ -261,17 +267,17 @@ async function main() {
       {
         userId: docUser1.id,
         message: 'New appointment scheduled by Juan Dela Cruz for June 2, 2026 at 10:00 AM.',
-        read: false,
+        isRead: false,
       },
       {
         userId: patientUser1.id,
         message: 'Your telehealth appointment slot with Dr. Alejandro Santos has been confirmed.',
-        read: true,
+        isRead: true,
       },
       {
         userId: docUser3.id,
         message: 'Your medical profile verification is currently under review by system administrators.',
-        read: false,
+        isRead: false,
       },
     ],
   });
