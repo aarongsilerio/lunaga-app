@@ -128,10 +128,6 @@ export default function DoctorOnboarding() {
         </form>
 
       </Card>
-
-      <div className="absolute bottom-0 w-full pb-4">
-        <LegalFooter />
-      </div>
     </div>
   );
 }
