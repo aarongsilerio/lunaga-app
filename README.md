@@ -21,7 +21,7 @@ To test the Doctor flow, ensure you register a **brand-new account** to trigger 
 1. Sign up as a new user.
 2. On landing page, access [https://lunaga-app-mpuu.vercel.app/onboarding/doctor/](https://lunaga-app-mpuu.vercel.app/onboarding/doctor/). Make sure you are logged in.
 3. **Critical:** You must complete the **Doctor Profile Settings** form in its entirety (including Specialization, Clinic Days, and Availability). 
-4. Doctor accounts are subject for confirmation via Admin. 
+4. Doctor accounts are subject for confirmation via Admin. (Disabled for now for testing)
 5. After confirmation, you will be redirected to the **Doctor Dashboard**, where you can manage your proposed appointments and view your schedule.
 
 ---

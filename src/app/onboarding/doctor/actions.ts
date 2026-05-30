@@ -41,7 +41,7 @@ export async function createDoctorProfile(formData: FormData) {
         role: "DOCTOR",
         firstName,
         lastName,
-        isApproved: false, // Security: Must be approved by Admin later
+        isApproved: true, // Security: Must be approved by Admin later (For testing)
       }
     });
 
