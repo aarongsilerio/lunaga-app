@@ -18,7 +18,14 @@ interface ProfileSettingsFormProps {
 
 export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(profile.profilePicture || null);
+  
+  // SMART EXTRACTOR: Looks for the data on the nested user object first, then falls back
+  const userContext = profile?.user || profile;
+  const initialFirstName = userContext?.firstName || "";
+  const initialLastName = userContext?.lastName || "";
+  const initialProfilePic = userContext?.profilePicture || null;
+
+  const [imagePreview, setImagePreview] = useState<string | null>(initialProfilePic);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,19 +85,17 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
 
         {/* ================= CORE DETAILS ================= */}
         <div className="space-y-6">
-          {/* FIX 1: Split Name into First and Last Name */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-[#1E3A5F]/70">First Name</label>
-              <Input name="firstName" defaultValue={profile.firstName || ""} required className="h-12 rounded-xl bg-[#F7FAFC]" />
+              <Input name="firstName" defaultValue={initialFirstName} required className="h-12 rounded-xl bg-[#F7FAFC]" />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-[#1E3A5F]/70">Last Name</label>
-              <Input name="lastName" defaultValue={profile.lastName || ""} required className="h-12 rounded-xl bg-[#F7FAFC]" />
+              <Input name="lastName" defaultValue={initialLastName} required className="h-12 rounded-xl bg-[#F7FAFC]" />
             </div>
           </div>
 
-          {/* FIX 2: Group Title, Extension, and Gender cleanly */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2 md:col-span-1">
               <label className="text-xs font-bold uppercase tracking-wider text-[#1E3A5F]/70">Title</label>
@@ -157,7 +162,7 @@ export function ProfileSettingsForm({ profile }: ProfileSettingsFormProps) {
             {DAYS_OF_WEEK.map((day) => {
               const isCheckedByDefault = profile.clinicDays?.includes(day);
               return (
-                <label key={day} className="flex items-center gap-2 p-3 rounded-xl border border-[#6FAEE7]/20 bg-white hover:bg-[#F7FAFC] cursor-pointer transition-colors has-checked:bg-[#1E3A5F] has-checked:text-white has-checked:border-[#1E3A5F]">
+                <label key={day} className="flex items-center gap-2 p-3 rounded-xl border border-[#6FAEE7]/20 bg-white hover:bg-[#F7FAFC] cursor-pointer transition-colors has-[:checked]:bg-[#1E3A5F] has-[:checked]:text-white has-[:checked]:border-[#1E3A5F]">
                   <input type="checkbox" name="clinicDays" value={day} defaultChecked={isCheckedByDefault} className="hidden" />
                   <CheckSquare className="w-4 h-4 opacity-70" />
                   <span className="text-sm font-semibold">{day}</span>

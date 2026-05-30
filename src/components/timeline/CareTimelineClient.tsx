@@ -179,7 +179,7 @@ export function CareTimelineClient({
                     <span className="text-xs text-[#1E3A5F]/50 font-mono">ID: {appt.id}</span>
                   </div>
                   <h3 className="text-lg font-bold text-[#1E3A5F] group-hover:text-[#6FAEE7] transition-colors">
-                    Dr. {appt.doctor.name}
+                    {appt.doctor.name}
                   </h3>
                   <div className="flex flex-wrap gap-4 text-sm text-[#1E3A5F]/70">
                     <span className="flex items-center gap-1.5"><User className="w-4 h-4 text-[#6FAEE7]" /> {appt.doctor.specialization}</span>
@@ -200,7 +200,7 @@ export function CareTimelineClient({
                   <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${appt.status === "COMPLETED" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600"}`}>
                     {appt.status}
                   </span>
-                  <h3 className="text-base font-bold text-[#1E3A5F]">Consultation with Dr. {appt.doctor.name}</h3>
+                  <h3 className="text-base font-bold text-[#1E3A5F]">Consultation with {appt.doctor.name}</h3>
                   <p className="text-xs text-[#1E3A5F]/60">{new Date(appt.datetime).toLocaleDateString()}</p>
                 </div>
                 {appt.status === "COMPLETED" && (
@@ -244,7 +244,7 @@ export function CareTimelineClient({
 
             <div className="space-y-1">
               <h3 className="text-xl font-bold text-[#1E3A5F]">Manage Consultation</h3>
-              <p className="text-sm text-[#1E3A5F]/60">Dr. {selectedAppt.doctor.name} — {selectedAppt.doctor.specialization}</p>
+              <p className="text-sm text-[#1E3A5F]/60">{selectedAppt.doctor.name} — {selectedAppt.doctor.specialization}</p>
             </div>
 
             <div className="p-4 bg-[#F7FAFC] rounded-xl text-sm space-y-2 border border-[#6FAEE7]/10">

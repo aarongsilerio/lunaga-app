@@ -16,6 +16,7 @@ import {
   ClipboardEdit,
   ArrowRight
 } from "lucide-react";
+import { ProposedAppointmentsList } from "@/components/doctor/ProposedAppointmentsList";
 
 export default async function DoctorDashboardPage() {
   const user = await currentUser();
@@ -28,8 +29,16 @@ export default async function DoctorDashboardPage() {
   });
 
   if (!dbUser || !dbUser.doctorProfile) redirect("/onboarding/doctor");
+  
   const profile = dbUser.doctorProfile;
-  const doctorFullName = `${dbUser.firstName} ${dbUser.lastName}`;
+  
+  // FIX 1: Robust Naming Fallbacks
+  // Safely extract names, preferring the database, then Clerk, then empty string
+  const firstName = dbUser.firstName || user.firstName || "";
+  const lastName = dbUser.lastName || user.lastName || "";
+  
+  const safeLastName = lastName || "Doctor";
+  const doctorFullName = `${firstName} ${lastName}`.trim() || "Unknown Doctor";
 
   // 2. Define Time Boundaries
   const now = new Date();
@@ -38,7 +47,7 @@ export default async function DoctorDashboardPage() {
   endOfToday.setDate(endOfToday.getDate() + 1);
 
   // 3. Fetch Data in Parallel for Performance
-  const [upcomingAppointments, missingEmrAppointments, totalUniquePatients] = await Promise.all([
+  const [upcomingAppointments, missingEmrAppointments, totalUniquePatients, proposedAppointments] = await Promise.all([
     // A. All future and today's appointments
     prisma.appointment.findMany({
       where: {
@@ -68,6 +77,19 @@ export default async function DoctorDashboardPage() {
       where: {
         appointments: { some: { doctorId: profile.id } }
       }
+    }),
+
+    // D. Fetch Proposed Appointments
+    prisma.appointment.findMany({
+      where: {
+        doctorId: profile.id,
+        status: "PROPOSED", 
+        datetime: { gte: new Date() } 
+      },
+      include: {
+        patient: { include: { user: true } }
+      },
+      orderBy: { datetime: 'asc' }
     })
   ]);
 
@@ -82,7 +104,7 @@ export default async function DoctorDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-[#1E3A5F]">
-            Good {now.getHours() < 12 ? 'Morning' : now.getHours() < 18 ? 'Afternoon' : 'Evening'}, {profile.title || 'Dr.'} {dbUser.lastName}
+            Good {now.getHours() < 12 ? 'Morning' : now.getHours() < 18 ? 'Afternoon' : 'Evening'}, {profile.title || 'Dr.'} {safeLastName}
           </h1>
           <p className="text-[#1E3A5F]/70 font-medium mt-1 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" /> Account Verified & Active
@@ -136,6 +158,11 @@ export default async function DoctorDashboardPage() {
         {/* LEFT COLUMN: SCHEDULE */}
         <div className="lg:col-span-2 space-y-8">
           
+          {/* FIX 2: Render Proposed Appointments directly inside the layout */}
+          {proposedAppointments.length > 0 && (
+            <ProposedAppointmentsList proposals={proposedAppointments} />
+          )}
+
           {/* Section: Today */}
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-[#1E3A5F] flex items-center gap-2">
@@ -149,30 +176,35 @@ export default async function DoctorDashboardPage() {
                 <p className="text-[#1E3A5F]/60 max-w-sm mt-1 text-sm">You have no more patients scheduled for today.</p>
               </Card>
             ) : (
-              todayAppointments.map((appt) => (
-                <Card key={appt.id} className="p-5 border-l-4 border-l-[#6FAEE7] border-y-[#6FAEE7]/20 border-r-[#6FAEE7]/20 shadow-sm rounded-2xl bg-white hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#1E3A5F]/5 flex items-center justify-center text-[#1E3A5F] font-bold text-xl shrink-0">
-                      {appt.patient.user?.firstName?.charAt(0) || "P"}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-[#1E3A5F]">{appt.patient.user?.firstName} {appt.patient.user?.lastName}</h3>
-                      <p className="text-sm text-[#1E3A5F]/70 line-clamp-1">{appt.reason || "General Consultation"}</p>
-                      <div className="flex items-center gap-2 mt-2 text-xs font-bold text-[#1E3A5F]">
-                        <span className="flex items-center gap-1 bg-[#6FAEE7]/10 text-[#1E3A5F] px-2 py-1 rounded-md">
-                          <Clock className="w-3.5 h-3.5 text-[#6FAEE7]" /> 
-                          {new Date(appt.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+              todayAppointments.map((appt) => {
+                const patientFirst = appt.patient.user?.firstName || "Unknown";
+                const patientLast = appt.patient.user?.lastName || "Patient";
+                
+                return (
+                  <Card key={appt.id} className="p-5 border-l-4 border-l-[#6FAEE7] border-y-[#6FAEE7]/20 border-r-[#6FAEE7]/20 shadow-sm rounded-2xl bg-white hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#1E3A5F]/5 flex items-center justify-center text-[#1E3A5F] font-bold text-xl shrink-0">
+                        {patientFirst.charAt(0)}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-[#1E3A5F]">{patientFirst} {patientLast}</h3>
+                        <p className="text-sm text-[#1E3A5F]/70 line-clamp-1">{appt.reason || "General Consultation"}</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs font-bold text-[#1E3A5F]">
+                          <span className="flex items-center gap-1 bg-[#6FAEE7]/10 text-[#1E3A5F] px-2 py-1 rounded-md">
+                            <Clock className="w-3.5 h-3.5 text-[#6FAEE7]" /> 
+                            {new Date(appt.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <Link href={`/doctor/consultation/${appt.id}`} className="shrink-0 w-full md:w-auto">
-                    <Button className="w-full bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 text-white font-bold rounded-xl h-11 px-6 flex items-center gap-2 shadow-md">
-                      <Video className="w-4 h-4" /> Enter LunaRoom
-                    </Button>
-                  </Link>
-                </Card>
-              ))
+                    <Link href={`/doctor/consultation/${appt.id}`} className="shrink-0 w-full md:w-auto">
+                      <Button className="w-full bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 text-white font-bold rounded-xl h-11 px-6 flex items-center gap-2 shadow-md">
+                        <Video className="w-4 h-4" /> Enter LunaRoom
+                      </Button>
+                    </Link>
+                  </Card>
+                );
+              })
             )}
           </div>
 
@@ -183,21 +215,26 @@ export default async function DoctorDashboardPage() {
                 <Calendar className="w-5 h-5 text-[#6FAEE7]" /> Upcoming This Week
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {futureAppointments.map((appt) => (
-                  <Card key={appt.id} className="p-4 border border-[#6FAEE7]/20 shadow-sm rounded-2xl bg-white flex items-center gap-4">
-                     <div className="w-10 h-10 rounded-full bg-[#F7FAFC] flex items-center justify-center text-[#1E3A5F] font-bold shrink-0">
-                      {appt.patient.user?.firstName?.charAt(0) || "P"}
-                    </div>
-                    <div className="flex-1 overflow-hidden">
-                      <h3 className="text-sm font-bold text-[#1E3A5F] truncate">{appt.patient.user?.firstName} {appt.patient.user?.lastName}</h3>
-                      <div className="flex items-center gap-2 mt-1 text-[11px] font-semibold text-[#1E3A5F]/60">
-                        <span>{new Date(appt.datetime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
-                        <span>•</span>
-                        <span>{new Date(appt.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                {futureAppointments.map((appt) => {
+                  const patientFirst = appt.patient.user?.firstName || "Unknown";
+                  const patientLast = appt.patient.user?.lastName || "Patient";
+
+                  return (
+                    <Card key={appt.id} className="p-4 border border-[#6FAEE7]/20 shadow-sm rounded-2xl bg-white flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-[#F7FAFC] flex items-center justify-center text-[#1E3A5F] font-bold shrink-0">
+                        {patientFirst.charAt(0)}
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                      <div className="flex-1 overflow-hidden">
+                        <h3 className="text-sm font-bold text-[#1E3A5F] truncate">{patientFirst} {patientLast}</h3>
+                        <div className="flex items-center gap-2 mt-1 text-[11px] font-semibold text-[#1E3A5F]/60">
+                          <span>{new Date(appt.datetime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                          <span>•</span>
+                          <span>{new Date(appt.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -210,31 +247,36 @@ export default async function DoctorDashboardPage() {
           
           {missingEmrAppointments.length > 0 ? (
             <div className="space-y-3">
-              {missingEmrAppointments.map(appt => (
-                <Card key={appt.id} className="p-4 border-l-4 border-l-amber-400 bg-white shadow-sm rounded-2xl border-y-[#6FAEE7]/10 border-r-[#6FAEE7]/10">
-                  <div className="flex gap-3">
-                    <ClipboardEdit className="w-5 h-5 text-amber-500 shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="text-sm font-bold text-[#1E3A5F]">Missing EMR Notes</h4>
-                      <p className="text-xs text-[#1E3A5F]/70 mt-1 leading-relaxed">
-                        Please finalize clinical notes for <span className="font-semibold text-[#1E3A5F]">{appt.patient.user?.firstName} {appt.patient.user?.lastName}</span>.
-                      </p>
-                      <Link href={`/doctor/consultation/${appt.id}`} className="text-xs font-bold text-[#6FAEE7] hover:underline mt-2 inline-flex items-center gap-1">
-                        Complete Record <ArrowRight className="w-3 h-3" />
-                      </Link>
+              {missingEmrAppointments.map((appt) => {
+                const patientFirst = appt.patient.user?.firstName || "Unknown";
+                const patientLast = appt.patient.user?.lastName || "Patient";
+
+                return (
+                  <Card key={appt.id} className="p-4 border-l-4 border-l-amber-400 bg-white shadow-sm rounded-2xl border-y-[#6FAEE7]/10 border-r-[#6FAEE7]/10">
+                    <div className="flex gap-3">
+                      <ClipboardEdit className="w-5 h-5 text-amber-500 shrink-0" />
+                      <div className="flex-1">
+                        <h4 className="text-sm font-bold text-[#1E3A5F]">Missing EMR Notes</h4>
+                        <p className="text-xs text-[#1E3A5F]/70 mt-1 leading-relaxed">
+                          Please finalize clinical notes for <span className="font-semibold text-[#1E3A5F]">{patientFirst} {patientLast}</span>.
+                        </p>
+                        <Link href={`/doctor/consultation/${appt.id}`} className="text-xs font-bold text-[#6FAEE7] hover:underline mt-2 inline-flex items-center gap-1">
+                          Complete Record <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           ) : (
-             <Card className="p-5 border border-green-100 bg-green-50 shadow-sm rounded-2xl flex items-start gap-3">
-               <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
-               <div>
-                 <h4 className="text-sm font-bold text-green-800">All Caught Up!</h4>
-                 <p className="text-xs text-green-700/80 mt-1">You have finalized all electronic medical records for your past sessions.</p>
-               </div>
-             </Card>
+              <Card className="p-5 border border-green-100 bg-green-50 shadow-sm rounded-2xl flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+                <div>
+                  <h4 className="text-sm font-bold text-green-800">All Caught Up!</h4>
+                  <p className="text-xs text-green-700/80 mt-1">You have finalized all electronic medical records for your past sessions.</p>
+                </div>
+              </Card>
           )}
 
           <ProviderSupportCard doctorName={doctorFullName} />

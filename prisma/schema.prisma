@@ -26,6 +26,8 @@ enum AppointmentStatus {
   PENDING
   COMPLETED
   CANCELLED
+  PROPOSED
+  REJECTED
 }
 
 // ==========================================
