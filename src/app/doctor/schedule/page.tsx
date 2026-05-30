@@ -19,14 +19,15 @@ export default async function DoctorSchedulePage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const appointments = await prisma.appointment.findMany({
+  const rawAppointments = await prisma.appointment.findMany({
     where: {
       doctorId: dbUser.doctorProfile.id,
       datetime: { gte: today }, // Ignore deeply past appointments for this view
     },
+    // FIX 1: Fetch the global user data instead of the deleted patient name field
     include: {
       patient: {
-        select: { name: true }
+        include: { user: true }
       }
     },
     orderBy: {
@@ -34,11 +35,22 @@ export default async function DoctorSchedulePage() {
     },
   });
 
+  // FIX 2: Intercept the data and map the first/last name back into a 'name' property
+  // This ensures your ScheduleClient component doesn't break!
+  const formattedAppointments = rawAppointments.map((appt) => ({
+    ...appt,
+    patient: {
+      ...appt.patient,
+      name: `${appt.patient.user?.firstName || "Unknown"} ${appt.patient.user?.lastName || ""}`.trim()
+    }
+  }));
+
   return (
     <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
       <ScheduleClient 
         userId={user.id} 
-        appointments={appointments} 
+        /* FIX 3: Pass the newly mapped array to the client */
+        appointments={formattedAppointments} 
         profile={{
           clinicDays: dbUser.doctorProfile.clinicDays,
           availability: dbUser.doctorProfile.availability

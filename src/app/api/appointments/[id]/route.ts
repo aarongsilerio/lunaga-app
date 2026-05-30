@@ -37,16 +37,24 @@ export async function PATCH(
       updateData.datetime = new Date(newDatetime);
     }
 
+    // Include the `user` relation for the patient to access firstName/lastName
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
       data: updateData,
-      include: { patient: true, doctor: { include: { user: true } } }
+      include: { 
+        patient: { include: { user: true } }, 
+        doctor: { include: { user: true } } 
+      }
     });
 
     const title = status === "CANCELLED" ? "Consultation Cancelled" : "Consultation Rescheduled";
+    
+    // Safely extract the patient's name from the included User table
+    const patientName = `${updatedAppointment.patient.user.firstName} ${updatedAppointment.patient.user.lastName}`;
+
     const message = status === "CANCELLED"
-      ? `${updatedAppointment.patient.name} cancelled the appointment scheduled for ${new Date(updatedAppointment.datetime).toLocaleDateString()}.`
-      : `${updatedAppointment.patient.name} rescheduled the appointment to ${new Date(updatedAppointment.datetime).toLocaleString()}.`;
+      ? `${patientName} cancelled the appointment scheduled for ${new Date(updatedAppointment.datetime).toLocaleDateString()}.`
+      : `${patientName} rescheduled the appointment to ${new Date(updatedAppointment.datetime).toLocaleString()}.`;
 
     const notification = await prisma.notification.create({
       data: {

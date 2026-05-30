@@ -94,7 +94,7 @@ export function LunaWidget() {
       
       {/* The Chat Window (Rendered conditionally with smooth animations) */}
       {isOpen && (
-        <Card className="w-[360px] h-[500px] mb-4 shadow-2xl border border-[#6FAEE7]/30 flex flex-col rounded-3xl overflow-hidden bg-white animate-in slide-in-from-bottom-10 fade-in zoom-in-95 duration-300 origin-bottom-right">
+        <Card className="w-90 h-125 mb-4 shadow-2xl border border-[#6FAEE7]/30 flex flex-col rounded-3xl overflow-hidden bg-white animate-in slide-in-from-bottom-10 fade-in zoom-in-95 duration-300 origin-bottom-right">
           
           {/* Header */}
           <div className="bg-[#1E3A5F] p-4 flex items-center justify-between text-white shrink-0">
@@ -149,7 +149,7 @@ export function LunaWidget() {
                               const isBookingLink = href?.includes("/patient/doctors/");
                               if (isBookingLink) {
                                 return (
-                                  <Link href={href!} className="block mt-2 px-3 py-2 bg-[#F7FAFC] text-[#1E3A5F] text-xs border border-[#6FAEE7]/30 rounded-lg font-bold hover:bg-[#1E3A5F] hover:text-white transition-all text-center !no-underline">
+                                  <Link href={href!} className="block mt-2 px-3 py-2 bg-[#F7FAFC] text-[#1E3A5F] text-xs border border-[#6FAEE7]/30 rounded-lg font-bold hover:bg-[#1E3A5F] hover:text-white transition-all text-center no-underline">
                                     {children}
                                   </Link>
                                 );

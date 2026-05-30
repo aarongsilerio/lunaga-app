@@ -16,7 +16,8 @@ type MedicalRecord = {
 };
 
 type PatientProfile = {
-  name: string;
+  firstName?: string | null;
+  lastName?: string | null;
   birthday: Date;
   sex: string | null;
   contactNumber: string | null;

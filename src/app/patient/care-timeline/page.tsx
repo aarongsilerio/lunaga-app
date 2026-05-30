@@ -26,17 +26,26 @@ export default async function CareTimelinePage() {
   }
 
   // 3. Aggregate all appointments linked to the patient ID
-  const appointments = await prisma.appointment.findMany({
+  const rawAppointments = await prisma.appointment.findMany({
     where: {
       patientId: dbUser.patientProfile.id,
     },
+    // Update the select block to pull the separated identity fields
     include: {
       doctor: {
         select: {
-          name: true,
+          id: true,
+          title: true,
+          extension: true,
           specialization: true,
-          clinicDays: true,     // NEW: e.g., ["Monday", "Wednesday"]
-          availability: true,   // NEW: e.g., [9.0, 9.5, 10.0]
+          clinicDays: true,
+          availability: true,
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+            }
+          }
         },
       },
     },
@@ -44,6 +53,15 @@ export default async function CareTimelinePage() {
       datetime: "desc",
     },
   });
+
+  // Data Transformer - Stitch the doctor's name back together so the client component doesn't break
+  const appointments = rawAppointments.map((appt) => ({
+    ...appt,
+    doctor: {
+      ...appt.doctor,
+      name: `${appt.doctor.title || ""} ${appt.doctor.user?.firstName || ""} ${appt.doctor.user?.lastName || ""}${appt.doctor.extension ? `, ${appt.doctor.extension}` : ""}`.trim()
+    }
+  }));
 
   // 4. Clean sorting arrays based on systemic lifecycle states
   const upcomingAppointments = appointments.filter((appt) =>

@@ -17,6 +17,13 @@ export default async function DoctorSettingsPage() {
     redirect("/onboarding/doctor");
   }
 
+  const mergedProfileData = {
+    ...dbUser.doctorProfile,
+    firstName: dbUser.firstName,
+    lastName: dbUser.lastName,
+    profilePicture: dbUser.profilePicture,
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
       
@@ -29,7 +36,7 @@ export default async function DoctorSettingsPage() {
       </div>
 
       {/* Profile Form Component */}
-      <ProfileSettingsForm profile={dbUser.doctorProfile} />
+      <ProfileSettingsForm profile={mergedProfileData as any} />
 
     </div>
   );

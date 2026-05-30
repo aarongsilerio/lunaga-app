@@ -27,8 +27,9 @@ export function PatientProfileForm({ initialData }: { initialData: any }) {
   const [contactNumber, setContactNumber] = useState<string>(profile.contactNumber || "");
   
   // 3. Fallback to Clerk's image if the database doesn't have one yet
+  // FIX: Access profilePicture from initialData (the User table), not the patientProfile table
   const [imagePreview, setImagePreview] = useState<string | null>(
-    profile.profilePicture || clerkUser?.imageUrl || null
+    initialData?.profilePicture || clerkUser?.imageUrl || null
   );
 
   const formattedBirthday = profile?.birthday 
@@ -111,7 +112,8 @@ export function PatientProfileForm({ initialData }: { initialData: any }) {
               <Avatar className="w-24 h-24 border-2 border-[#6FAEE7]/20 shadow-sm">
                 <AvatarImage src={imagePreview || ""} className="object-cover" />
                 <AvatarFallback className="bg-[#F7FAFC] text-2xl text-[#1E3A5F]/50">
-                  {profile.name ? profile.name.charAt(0) : (clerkUser?.firstName?.charAt(0) || "U")}
+                  {/* FIX 1: Safely grab the first letter from initialData (User) or Clerk */}
+                  {initialData?.firstName ? initialData.firstName.charAt(0) : (clerkUser?.firstName?.charAt(0) || "U")}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
@@ -124,11 +126,17 @@ export function PatientProfileForm({ initialData }: { initialData: any }) {
               </div>
             </div>
 
+            {/* FIX 2: Split Full Name into First and Last Name Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" name="name" defaultValue={profile.name || `${clerkUser?.firstName || ""} ${clerkUser?.lastName || ""}`.trim()} required placeholder="Juan Dela Cruz" className="border-[#6FAEE7]/30 focus-visible:ring-[#6FAEE7]/50" />
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" name="firstName" defaultValue={initialData?.firstName || clerkUser?.firstName || ""} required placeholder="Juan" className="border-[#6FAEE7]/30 focus-visible:ring-[#6FAEE7]/50" />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" name="lastName" defaultValue={initialData?.lastName || clerkUser?.lastName || ""} required placeholder="Dela Cruz" className="border-[#6FAEE7]/30 focus-visible:ring-[#6FAEE7]/50" />
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="birthday">Date of Birth</Label>
                 <Input id="birthday" name="birthday" type="date" defaultValue={formattedBirthday} required className="border-[#6FAEE7]/30 focus-visible:ring-[#6FAEE7]/50" />

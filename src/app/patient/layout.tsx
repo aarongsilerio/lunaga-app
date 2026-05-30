@@ -17,7 +17,7 @@ export default async function PatientLayout({
     include: { patientProfile: true },
   });
 
-  if (!dbUser?.patientProfile?.name) {
+  if (!dbUser?.patientProfile) {
     redirect("/onboarding");
   }
   // --------------------------------

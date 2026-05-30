@@ -11,14 +11,20 @@ export default async function DoctorConsultationPage({ params }: { params: Promi
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
-  // Fetch Appointment + Medical Record
   const appointment = await prisma.appointment.findUnique({
     where: { id },
     include: {
       patient: {
-        include: { medicalRecord: true }
+        include: { 
+          medicalRecord: true,
+          user: true 
+        }
       },
-      doctor: true,
+      doctor: {
+        include: {
+          user: true 
+        }
+      },
     },
   });
 
@@ -26,13 +32,17 @@ export default async function DoctorConsultationPage({ params }: { params: Promi
     redirect("/doctor/dashboard?error=UnauthorizedAccess");
   }
 
+  const patientName = `${appointment.patient.user.firstName} ${appointment.patient.user.lastName}`;
+  const doctorName = `${appointment.doctor.title || ""} ${appointment.doctor.user.firstName} ${appointment.doctor.user.lastName}`.trim();
+
   return (
     <div className="max-w-350 mx-auto space-y-6 animate-in fade-in duration-700 h-[calc(100vh-6rem)] flex flex-col">
       
       {/* Header */}
       <div className="flex items-center justify-between bg-white p-5 rounded-2xl shadow-sm border border-[#6FAEE7]/10 shrink-0">
         <div>
-          <h1 className="text-xl font-bold text-[#1E3A5F]">Patient Session: {appointment.patient.name}</h1>
+          {/* FIX 3: Use the constructed patientName variable */}
+          <h1 className="text-xl font-bold text-[#1E3A5F]">Patient Session: {patientName}</h1>
           <p className="text-[#1E3A5F]/70 text-sm mt-0.5 flex items-center gap-2">
             <Activity className="w-4 h-4 text-red-400" /> Reason for visit: {appointment.reason || "General Checkup"}
           </p>
@@ -49,7 +59,7 @@ export default async function DoctorConsultationPage({ params }: { params: Promi
         <div className="lg:col-span-2 h-full flex flex-col">
           <LunaRoom 
             roomName={appointment.id} 
-            userName={appointment.doctor.name} 
+            userName={doctorName} 
             userEmail={user.emailAddresses[0].emailAddress} 
             isDoctor={true}
             returnUrl="/doctor/dashboard"

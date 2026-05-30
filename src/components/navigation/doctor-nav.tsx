@@ -39,7 +39,7 @@ export function DoctorNav() {
             alt="Lunága" 
             width={100} 
             height={29} 
-            className="w-[100px] h-auto" 
+            className="w-25 h-auto" 
             priority 
           />
         </Link>
@@ -111,7 +111,7 @@ export function DoctorNav() {
             width={130} 
             height={38} 
             // Fixed width interpolation: Using exact bracket syntax for safe compilation
-            className="w-[100px] lg:w-[130px] h-auto transition-all" 
+            className="w-25 lg:w-32.5 h-auto transition-all" 
             priority 
           />
         </div>

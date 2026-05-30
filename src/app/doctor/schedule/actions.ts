@@ -15,7 +15,10 @@ export async function updateAvailability(formData: FormData) {
     // 2. Extract Clinic Hours (Floats, e.g., ["9", "9.5", "10"])
     // Convert the string array from FormData back into an array of Floats
     const availabilityStrings = formData.getAll("availability") as string[];
-    const availabilityFloats = availabilityStrings.map(val => parseFloat(val)).sort((a, b) => a - b);
+    const availabilityFloats = availabilityStrings
+      .map(val => parseFloat(val))
+      .filter(val => !isNaN(val))
+      .sort((a, b) => a - b);
 
     if (clinicDays.length === 0) {
       return { error: "You must select at least one available clinic day." };

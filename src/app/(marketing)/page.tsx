@@ -39,9 +39,9 @@ export default function MarketingPage() {
       {/* ========================================== */}
       {/* AMBIENT BACKGROUND GLOWS */}
       {/* ========================================== */}
-      <div className="absolute top-0 -z-10 h-[100vh] w-full bg-[#F7FAFC]">
-        <div className="absolute top-0 right-0 h-[600px] w-[600px] -translate-y-[10%] translate-x-[20%] rounded-full bg-[#6FAEE7]/20 opacity-60 blur-[100px]"></div>
-        <div className="absolute top-[20%] left-0 h-[500px] w-[500px] -translate-x-[30%] rounded-full bg-[#8ED8C3]/20 opacity-50 blur-[100px]"></div>
+      <div className="absolute top-0 -z-10 h-screen w-full bg-[#F7FAFC]">
+        <div className="absolute top-0 right-0 h-150 w-150 translate-y-[-10%] translate-x-[20%] rounded-full bg-[#6FAEE7]/20 opacity-60 blur-[100px]"></div>
+        <div className="absolute top-[20%] left-0 h-125 w-125 translate-x-[-30%] rounded-full bg-[#8ED8C3]/20 opacity-50 blur-[100px]"></div>
       </div>
 
       {/* ========================================== */}
@@ -59,7 +59,7 @@ export default function MarketingPage() {
           {/* Headline */}
           <h1 className="text-5xl font-extrabold tracking-tight text-[#1E3A5F] sm:text-6xl md:text-7xl lg:leading-[1.15]">
             Healthcare That <br />
-            <span className="bg-gradient-to-r from-[#6FAEE7] to-[#8ED8C3] bg-clip-text text-transparent drop-shadow-sm">
+            <span className="bg-linear-to-r from-[#6FAEE7] to-[#8ED8C3] bg-clip-text text-transparent drop-shadow-sm">
               Feels Closer.
             </span>
           </h1>
@@ -136,7 +136,7 @@ export default function MarketingPage() {
                 className="group relative overflow-hidden border-[#6FAEE7]/10 bg-white rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out"
               >
                 {/* Top Gradient Border on Hover */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#6FAEE7] to-[#8ED8C3] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-[#6FAEE7] to-[#8ED8C3] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 
                 <CardContent className="p-8 space-y-6">
                   <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${feature.bgClass} transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>

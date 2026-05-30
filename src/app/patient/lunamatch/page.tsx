@@ -131,7 +131,7 @@ export default function LunaMatchChat() {
                               return (
                                 <Link 
                                   href={href!} 
-                                  className="inline-flex items-center gap-2 mt-3 px-5 py-2.5 bg-[#F7FAFC] text-[#1E3A5F] border border-[#6FAEE7]/30 rounded-xl font-semibold hover:bg-[#1E3A5F] hover:text-white transition-all duration-300 shadow-sm !no-underline group w-fit"
+                                  className="inline-flex items-center gap-2 mt-3 px-5 py-2.5 bg-[#F7FAFC] text-[#1E3A5F] border border-[#6FAEE7]/30 rounded-xl font-semibold hover:bg-[#1E3A5F] hover:text-white transition-all duration-300 shadow-sm no-underline group w-fit"
                                 >
                                   <CalendarDays className="w-4 h-4 text-[#6FAEE7] group-hover:text-white transition-colors shrink-0" />
                                   {children}

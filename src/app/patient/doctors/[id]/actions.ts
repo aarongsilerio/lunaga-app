@@ -26,6 +26,9 @@ export async function bookAppointment(formData: FormData) {
 
     const appointmentDate = new Date(datetimeStr);
 
+    // Assemble the patient's name from the global User table
+    const patientFullName = `${dbUser.firstName || "Unknown"} ${dbUser.lastName || ""}`.trim();
+
     // 3. ENTERPRISE FAILSAFE: Race Condition & Double-Booking Check
     // Checks if the doctor already has a scheduled appointment at this exact minute.
     const existingBooking = await prisma.appointment.findFirst({
@@ -45,19 +48,20 @@ export async function bookAppointment(formData: FormData) {
       data: {
         patientId: dbUser.patientProfile.id,
         doctorId: doctorId,
-        datetime: new Date("2026-06-08T03:00:00.000Z"), 
+        datetime: appointmentDate, 
         status: "SCHEDULED",
-        
-        reason: null, 
+        reason: notes || null, 
       }
-    })
+    });
+
     // 5. Generate Real-Time Notification for the Doctor
     const doctor = await prisma.doctorProfile.findUnique({ where: { id: doctorId } });
     if (doctor) {
       await prisma.notification.create({
         data: {
           userId: doctor.userId,
-          message: `New appointment scheduled with ${dbUser.patientProfile.name} on ${appointmentDate.toLocaleDateString()} at ${appointmentDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}.`,
+          // Use the assembled patientFullName variable instead of dbUser.patientProfile.name
+          message: `New appointment scheduled with ${patientFullName} on ${appointmentDate.toLocaleDateString()} at ${appointmentDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}.`,
           isRead: false,
           title: "New Appointment Scheduled",
           type: "BOOKING"

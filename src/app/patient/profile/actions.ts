@@ -1,6 +1,6 @@
 "use server";
 
-import { currentUser } from "@clerk/nextjs/server"; // Upgraded from 'auth' to get full user data
+import { currentUser } from "@clerk/nextjs/server"; 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
@@ -55,8 +55,11 @@ export async function updatePatientProfile(formData: FormData) {
       profilePictureStr = `data:${profilePictureFile.type};base64,${buffer.toString("base64")}`;
     }
 
+    // Extract firstName and lastName instead of the unified 'name'
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+
     // 3. Extract standard profile data
-    const name = formData.get("name") as string;
     const birthdayStr = formData.get("birthday") as string;
     const sex = formData.get("sex") as string;
     const contactNumber = formData.get("contactNumber") as string;
@@ -74,27 +77,33 @@ export async function updatePatientProfile(formData: FormData) {
       ? pastMedicalHistoryStr.split(",").map((s) => s.trim()) 
       : [];
 
-    // 5. UPSERT Patient Profile
+    // Update the global User identity first
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName,
+        lastName,
+        ...(profilePictureStr && { profilePicture: profilePictureStr }),
+      }
+    });
+
+    // UPSERT Patient Profile without the deleted identity fields
     const patientProfile = await prisma.patientProfile.upsert({
       where: { userId: userId },
       update: {
-        name: name || "Unknown", // Added fallback protection
         birthday: birthdayStr ? new Date(birthdayStr) : new Date(),
         sex,
         contactNumber,
         address,
         occupation,
-        ...(profilePictureStr && { profilePicture: profilePictureStr }),
       },
       create: {
         user: { connect: { id: userId } }, // <-- PRISMA FIX: Explicitly connect the user relation
-        name: name || "Unknown",
         birthday: birthdayStr ? new Date(birthdayStr) : new Date(),
         sex,
         contactNumber,
         address,
         occupation,
-        profilePicture: profilePictureStr,
       },
     });
 

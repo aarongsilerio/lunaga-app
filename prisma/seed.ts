@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient, Role, AppointmentStatus } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
@@ -37,6 +37,9 @@ async function main() {
     data: {
       id: 'user_clerkAdmin999',
       email: 'admin@lunaga.ph',
+      firstName: 'Lunaga',
+      lastName: 'Admin',
+      profilePicture: null,
       role: Role.ADMIN,
       isApproved: true,
     },
@@ -44,24 +47,26 @@ async function main() {
 
   // Doctor Users
   const docUser1 = await prisma.user.create({
-    data: { id: 'user_clerkDoc001', email: 'dr.santos@lunaga.ph', role: Role.DOCTOR, isApproved: true },
+    data: { id: 'user_clerkDoc001', email: 'dr.santos@lunaga.ph', 
+      firstName: 'Alejandro',
+      lastName: 'Santos', profilePicture: null, role: Role.DOCTOR, isApproved: true },
   });
   const docUser2 = await prisma.user.create({
-    data: { id: 'user_clerkDoc002', email: 'dr.reyes@lunaga.ph', role: Role.DOCTOR, isApproved: true },
+    data: { id: 'user_clerkDoc002', email: 'dr.reyes@lunaga.ph', firstName: 'Beatrice', lastName: 'Reyes', profilePicture: null, role: Role.DOCTOR, isApproved: true },
   });
   const docUser3 = await prisma.user.create({
-    data: { id: 'user_clerkDoc003', email: 'dr.cruz@lunaga.ph', role: Role.DOCTOR, isApproved: false }, // Pending approval
+    data: { id: 'user_clerkDoc003', email: 'dr.cruz@lunaga.ph', firstName: 'Christian', lastName: 'Cruz', profilePicture: null, role: Role.DOCTOR, isApproved: false }, // Pending approval
   });
 
   // Patient Users
   const patientUser1 = await prisma.user.create({
-    data: { id: 'user_clerkPat001', email: 'juan.delacruz@gmail.com', role: Role.PATIENT, isApproved: true },
+    data: { id: 'user_clerkPat001', email: 'juan.delacruz@gmail.com', firstName: 'Juan', lastName: 'Dela Cruz', profilePicture: null, role: Role.PATIENT, isApproved: true },
   });
   const patientUser2 = await prisma.user.create({
-    data: { id: 'user_clerkPat002', email: 'maria.clara@gmail.com', role: Role.PATIENT, isApproved: true },
+    data: { id: 'user_clerkPat002', email: 'maria.clara@gmail.com', firstName: 'Maria Clara', lastName: 'Ybarra', profilePicture: null, role: Role.PATIENT, isApproved: true },
   });
   const patientUser3 = await prisma.user.create({
-    data: { id: 'user_clerkPat003', email: 'elias.salvador@gmail.com', role: Role.PATIENT, isApproved: true },
+    data: { id: 'user_clerkPat003', email: 'elias.salvador@gmail.com', firstName: 'Elias', lastName: 'Salvador', profilePicture: null, role: Role.PATIENT, isApproved: true },
   });
 
   // ==========================================
@@ -70,10 +75,10 @@ async function main() {
   const docProfile1 = await prisma.doctorProfile.create({
     data: {
       userId: docUser1.id,
-      name: 'Dr. Alejandro Santos, MD',
+      title: 'Dr.',
+      extension: 'MD, FACC',
       gender: 'Male',
       specialization: 'Cardiology',
-      profilePicture: null, 
       subSpecializations: ['Interventional Cardiology', 'Echocardiography'],
       bio: 'Board-certified cardiologist dedicated to preventative cardiovascular wellness and advanced clinical interventions.',
       hmoAccreditations: ['Maxicare', 'MediCard', 'Intellicare'],
@@ -90,10 +95,10 @@ async function main() {
   const docProfile2 = await prisma.doctorProfile.create({
     data: {
       userId: docUser2.id,
-      name: 'Dr. Beatrice Reyes, MD',
+      title: 'Dr.',
+      extension: 'MD',
       gender: 'Female',
       specialization: 'Pediatrics',
-      profilePicture: null,
       subSpecializations: ['Pediatric Allergy', 'Neonatology'],
       bio: 'Compassionate pediatrician focusing on comprehensive developmental tracking and childhood immunological profiles.',
       hmoAccreditations: ['Maxicare', 'PhilHealth', 'Caritas Health Shield'],
@@ -110,10 +115,10 @@ async function main() {
   const docProfile3 = await prisma.doctorProfile.create({
     data: {
       userId: docUser3.id,
-      name: 'Dr. Christian Cruz, MD',
+      title: 'Dr.',
+      extension: 'MD',
       gender: 'Male',
       specialization: 'General Medicine',
-      profilePicture: null,
       subSpecializations: [],
       bio: 'General practitioner prioritizing holistic family health, accessible primary diagnostics, and community triage care.',
       hmoAccreditations: ['MediCard'],
@@ -133,39 +138,33 @@ async function main() {
   const patProfile1 = await prisma.patientProfile.create({
     data: {
       userId: patientUser1.id,
-      name: 'Juan Dela Cruz',
       birthday: new Date('1992-06-15T00:00:00Z'),
       sex: 'Male',
       contactNumber: '+639051112222',
       address: '123 Rizal Avenue, Taytay, Rizal',
       occupation: 'Software Engineer',
-      profilePicture: null,
     },
   });
 
   const patProfile2 = await prisma.patientProfile.create({
     data: {
       userId: patientUser2.id,
-      name: 'Maria Clara',
       birthday: new Date('1998-10-24T00:00:00Z'),
       sex: 'Female',
       contactNumber: '+639063334444',
       address: '456 Mabini St, Pasig City, Metro Manila',
       occupation: 'Graphic Designer',
-      profilePicture: null,
     },
   });
 
   const patProfile3 = await prisma.patientProfile.create({
     data: {
       userId: patientUser3.id,
-      name: 'Elias Salvador',
       birthday: new Date('1985-03-03T00:00:00Z'),
       sex: 'Male',
       contactNumber: '+639075556666',
       address: '789 Luna Compound, Antipolo, Rizal',
       occupation: 'Agricultural Coordinator',
-      profilePicture: null,
     },
   });
 
@@ -179,7 +178,7 @@ async function main() {
       dateOfAdmission: new Date('2026-01-10T08:00:00Z'),
       weight: 74.5,
       height: 175.2,
-      bloodType: 'O-Positive',
+      bloodType: 'O+',
       ongoingConcerns: 'Occasional mild palpitations under elevated workloads.',
       allergies: 'Penicillin, Seafood',
       medicationHistory: 'Paracetamol 500mg as needed for occasional tension headaches.',
@@ -197,7 +196,7 @@ async function main() {
       dateOfAdmission: null,
       weight: 52.0,
       height: 162.5,
-      bloodType: 'A-Negative',
+      bloodType: 'A-',
       ongoingConcerns: 'Seasonal allergic rhinitis triggered by high pollen counts.',
       allergies: 'Dust Mites, Pollen',
       medicationHistory: 'Cetirizine 10mg once daily during symptomatic flareups.',
@@ -215,7 +214,7 @@ async function main() {
       dateOfAdmission: new Date('2026-04-20T14:30:00Z'),
       weight: 81.2,
       height: 180.0,
-      bloodType: 'B-Positive',
+      bloodType: 'B+',
       ongoingConcerns: 'Lower back stiffness following field operations.',
       allergies: 'None reported.',
       medicationHistory: 'Ibuprofen 400mg taken rarely for systemic joint inflammation.',
@@ -243,7 +242,7 @@ async function main() {
         patientId: patProfile2.id,
         doctorId: docProfile2.id,
         datetime: new Date('2026-06-04T14:30:00Z'),
-        status: 'PENDING',
+        status: 'RESCHEDULED',
         meetingLink: null,
         reason: 'Consultation booking request regarding seasonal immunology panel adjustments.',
       },
@@ -266,16 +265,22 @@ async function main() {
     data: [
       {
         userId: docUser1.id,
+        title: 'New Appointment Scheduled',
+        type: 'APPOINTMENT',
         message: 'New appointment scheduled by Juan Dela Cruz for June 2, 2026 at 10:00 AM.',
         isRead: false,
       },
       {
         userId: patientUser1.id,
+        title: 'Appointment Confirmation',
+        type: 'APPOINTMENT',
         message: 'Your telehealth appointment slot with Dr. Alejandro Santos has been confirmed.',
         isRead: true,
       },
       {
         userId: docUser3.id,
+        title: 'Profile Verification Pending',
+        type: 'SYSTEM',
         message: 'Your medical profile verification is currently under review by system administrators.',
         isRead: false,
       },

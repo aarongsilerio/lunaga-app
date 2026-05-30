@@ -28,6 +28,7 @@ export default async function DoctorPatientsDirectory() {
       }
     },
     include: {
+      user: true, // FIX 1: Fetch the base User to get firstName and lastName
       medicalRecord: true,
       appointments: {
         where: { doctorId: doctorId },
@@ -35,7 +36,8 @@ export default async function DoctorPatientsDirectory() {
         take: 1, // Only fetch the most recent appointment for the directory summary
       }
     },
-    orderBy: { name: "asc" }
+    // FIX 2: Update the orderBy to sort alphabetically using the related User table's firstName
+    orderBy: { user: { firstName: "asc" } }
   });
 
   return (
@@ -69,14 +71,20 @@ export default async function DoctorPatientsDirectory() {
           patients.map((patient) => {
             const lastAppt = patient.appointments[0];
             
+            // FIX 3: Construct the name variables inside the map function
+            const patientFullName = `${patient.user?.firstName || "Unknown"} ${patient.user?.lastName || ""}`.trim();
+            const patientInitial = patient.user?.firstName?.charAt(0) || "P";
+            
             return (
               <Card key={patient.id} className="p-6 bg-white border border-[#6FAEE7]/20 rounded-3xl shadow-sm hover:shadow-md hover:border-[#6FAEE7]/50 transition-all flex flex-col h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 rounded-full bg-[#1E3A5F] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-inner">
-                    {patient.name.charAt(0)}
+                    {/* FIX 4: Use the safe initial variable */}
+                    {patientInitial}
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-[#1E3A5F] line-clamp-1">{patient.name}</h3>
+                    {/* FIX 5: Use the constructed full name */}
+                    <h3 className="text-lg font-bold text-[#1E3A5F] line-clamp-1">{patientFullName}</h3>
                     <p className="text-xs text-[#1E3A5F]/60">ID: {patient.id.toString().padStart(6, '0')}</p>
                   </div>
                 </div>

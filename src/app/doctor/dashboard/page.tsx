@@ -13,7 +13,6 @@ import {
   Clock, 
   Video, 
   CheckCircle2,
-  AlertCircle,
   ClipboardEdit,
   ArrowRight
 } from "lucide-react";
@@ -30,6 +29,7 @@ export default async function DoctorDashboardPage() {
 
   if (!dbUser || !dbUser.doctorProfile) redirect("/onboarding/doctor");
   const profile = dbUser.doctorProfile;
+  const doctorFullName = `${dbUser.firstName} ${dbUser.lastName}`;
 
   // 2. Define Time Boundaries
   const now = new Date();
@@ -46,7 +46,7 @@ export default async function DoctorDashboardPage() {
         status: { in: ["SCHEDULED", "PENDING", "RESCHEDULED"] },
         datetime: { gte: startOfToday } 
       },
-      include: { patient: true },
+      include: { patient: { include: { user: true } } },
       orderBy: { datetime: "asc" },
       take: 10 
     }),
@@ -56,9 +56,9 @@ export default async function DoctorDashboardPage() {
       where: {
         doctorId: profile.id,
         status: "COMPLETED",
-        clinicalNotes: null // Identifying missing EMRs
+        clinicalNotes: null 
       },
-      include: { patient: true },
+      include: { patient: { include: { user: true } } },
       orderBy: { datetime: "desc" },
       take: 3
     }),
@@ -82,7 +82,7 @@ export default async function DoctorDashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-[#1E3A5F]">
-            Good {now.getHours() < 12 ? 'Morning' : now.getHours() < 18 ? 'Afternoon' : 'Evening'}, Dr. {profile.name.split(' ')[1] || profile.name}
+            Good {now.getHours() < 12 ? 'Morning' : now.getHours() < 18 ? 'Afternoon' : 'Evening'}, {profile.title || 'Dr.'} {dbUser.lastName}
           </h1>
           <p className="text-[#1E3A5F]/70 font-medium mt-1 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" /> Account Verified & Active
@@ -153,10 +153,10 @@ export default async function DoctorDashboardPage() {
                 <Card key={appt.id} className="p-5 border-l-4 border-l-[#6FAEE7] border-y-[#6FAEE7]/20 border-r-[#6FAEE7]/20 shadow-sm rounded-2xl bg-white hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-full bg-[#1E3A5F]/5 flex items-center justify-center text-[#1E3A5F] font-bold text-xl shrink-0">
-                      {appt.patient.name.charAt(0)}
+                      {appt.patient.user?.firstName?.charAt(0) || "P"}
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-[#1E3A5F]">{appt.patient.name}</h3>
+                      <h3 className="text-lg font-bold text-[#1E3A5F]">{appt.patient.user?.firstName} {appt.patient.user?.lastName}</h3>
                       <p className="text-sm text-[#1E3A5F]/70 line-clamp-1">{appt.reason || "General Consultation"}</p>
                       <div className="flex items-center gap-2 mt-2 text-xs font-bold text-[#1E3A5F]">
                         <span className="flex items-center gap-1 bg-[#6FAEE7]/10 text-[#1E3A5F] px-2 py-1 rounded-md">
@@ -186,10 +186,10 @@ export default async function DoctorDashboardPage() {
                 {futureAppointments.map((appt) => (
                   <Card key={appt.id} className="p-4 border border-[#6FAEE7]/20 shadow-sm rounded-2xl bg-white flex items-center gap-4">
                      <div className="w-10 h-10 rounded-full bg-[#F7FAFC] flex items-center justify-center text-[#1E3A5F] font-bold shrink-0">
-                      {appt.patient.name.charAt(0)}
+                      {appt.patient.user?.firstName?.charAt(0) || "P"}
                     </div>
                     <div className="flex-1 overflow-hidden">
-                      <h3 className="text-sm font-bold text-[#1E3A5F] truncate">{appt.patient.name}</h3>
+                      <h3 className="text-sm font-bold text-[#1E3A5F] truncate">{appt.patient.user?.firstName} {appt.patient.user?.lastName}</h3>
                       <div className="flex items-center gap-2 mt-1 text-[11px] font-semibold text-[#1E3A5F]/60">
                         <span>{new Date(appt.datetime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
                         <span>•</span>
@@ -217,7 +217,7 @@ export default async function DoctorDashboardPage() {
                     <div className="flex-1">
                       <h4 className="text-sm font-bold text-[#1E3A5F]">Missing EMR Notes</h4>
                       <p className="text-xs text-[#1E3A5F]/70 mt-1 leading-relaxed">
-                        Please finalize clinical notes for <span className="font-semibold text-[#1E3A5F]">{appt.patient.name}</span>.
+                        Please finalize clinical notes for <span className="font-semibold text-[#1E3A5F]">{appt.patient.user?.firstName} {appt.patient.user?.lastName}</span>.
                       </p>
                       <Link href={`/doctor/consultation/${appt.id}`} className="text-xs font-bold text-[#6FAEE7] hover:underline mt-2 inline-flex items-center gap-1">
                         Complete Record <ArrowRight className="w-3 h-3" />
@@ -237,8 +237,7 @@ export default async function DoctorDashboardPage() {
              </Card>
           )}
 
-          {/* Interactive Support Card Component */}
-          <ProviderSupportCard doctorName={profile.name} />
+          <ProviderSupportCard doctorName={doctorFullName} />
 
         </div>
 

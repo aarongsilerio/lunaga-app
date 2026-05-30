@@ -173,7 +173,7 @@ export function ToastContainer() {
               key={toast.id}
               className={`flex gap-3 p-4 rounded-lg border shadow-lg animate-in slide-in-from-right-full duration-300 ${getToastStyles(toast.type)}`}
             >
-              <div className={`flex-shrink-0 text-lg font-bold ${getIconStyles(toast.type)}`}>
+              <div className={`shrink-0 text-lg font-bold ${getIconStyles(toast.type)}`}>
                 {getToastIcon(toast.type)}
               </div>
 
@@ -197,7 +197,7 @@ export function ToastContainer() {
 
                 <button
                   onClick={() => removeToast(toast.id)}
-                  className="flex-shrink-0 hover:opacity-50 text-lg"
+                  className="shrink-0 hover:opacity-50 text-lg"
                 >
                   ×
                 </button>

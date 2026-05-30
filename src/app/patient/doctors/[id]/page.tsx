@@ -32,7 +32,7 @@ export default async function DoctorProfilePage({ params }: { params: Promise<{ 
   const doctor = await prisma.doctorProfile.findUnique({
     where: { id: doctorId },
     include: { 
-      user: true,
+      user: true, 
       appointments: {
         where: {
           datetime: { gte: new Date() }, // Only fetch appointments from right now onward
@@ -44,6 +44,18 @@ export default async function DoctorProfilePage({ params }: { params: Promise<{ 
   });
 
   if (!doctor) return notFound();
+
+  // Assemble the full professional name string
+  const doctorFullName = `${doctor.title || ""} ${doctor.user?.firstName || ""} ${doctor.user?.lastName || ""}${doctor.extension ? `, ${doctor.extension}` : ""}`.trim();
+
+  // Create a merged object to safely pass down to the BookingForm
+  const mergedDoctor = {
+    ...doctor,
+    name: doctorFullName, // Fallback for legacy components
+    firstName: doctor.user?.firstName,
+    lastName: doctor.user?.lastName,
+    profilePicture: doctor.user?.profilePicture, 
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-700 pb-12">
@@ -65,23 +77,23 @@ export default async function DoctorProfilePage({ params }: { params: Promise<{ 
             
             {/* Custom Optimized Next.js Avatar */}
             <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-[#F7FAFC] shadow-md shrink-0 bg-[#1E3A5F] flex items-center justify-center text-white text-4xl font-bold">
-              {doctor.profilePicture ? (
+              {mergedDoctor.profilePicture ? (
                 <Image 
-                  src={doctor.profilePicture} 
-                  alt={`Dr. ${doctor.name}`} 
+                  src={mergedDoctor.profilePicture} 
+                  alt={doctorFullName} 
                   fill 
                   className="object-cover"
                   sizes="(max-width: 768px) 128px, 128px"
                   priority
                 />
               ) : (
-                // Safe fallback to first letter of name if no photo exists
-                doctor.name.charAt(0)
+                // Safe fallback to the first letter of their first name
+                mergedDoctor.firstName?.charAt(0) || "D"
               )}
             </div>
 
             <div>
-              <h1 className="text-3xl font-extrabold text-[#1E3A5F] tracking-tight">{doctor.name}</h1>
+              <h1 className="text-3xl font-extrabold text-[#1E3A5F] tracking-tight">{doctorFullName}</h1>
               <p className="text-lg font-semibold text-[#6FAEE7] mt-1 flex items-center gap-2">
                 {doctor.specialization} 
                 {doctor.gender && <span className="text-sm font-normal text-[#1E3A5F]/50 bg-[#F7FAFC] px-2 py-0.5 rounded-md border border-[#6FAEE7]/10">{doctor.gender}</span>}
@@ -190,7 +202,7 @@ export default async function DoctorProfilePage({ params }: { params: Promise<{ 
 
         {/* RIGHT COLUMN: Interactive Booking Form */}
         <div className="lg:col-span-1 lg:sticky lg:top-24">
-          <BookingForm doctor={doctor} />
+          <BookingForm doctor={mergedDoctor as any} />
         </div>
 
       </div>

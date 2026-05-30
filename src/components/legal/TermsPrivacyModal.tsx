@@ -452,12 +452,15 @@ export function TermsPrivacyModal({ isOpen, onClose, type }: TermsPrivacyModalPr
                 // Handle bullet points
                 if (line.trim().startsWith('-')) {
                   return (
-                    <li
+                    <ul>
+                      <li
                       key={index}
                       className="ml-10 mb-0 text-gray-700"
-                    >
-                      {line.trim().substring(1).trim()}
-                    </li>
+                      >
+                        {line.trim().substring(1).trim()}
+                      </li>
+                    </ul>
+                    
                   );
                 }
 

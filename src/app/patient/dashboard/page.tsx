@@ -41,6 +41,21 @@ export default async function PatientDashboard() {
   const patientProfile = dbUser?.patientProfile;
   const nextAppointment = patientProfile?.appointments[0];
 
+  // Safely assemble the doctor's formatted name
+  const doctorName = nextAppointment 
+    ? `${nextAppointment.doctor.title || ""} ${nextAppointment.doctor.user?.firstName || ""} ${nextAppointment.doctor.user?.lastName || ""}${nextAppointment.doctor.extension ? `, ${nextAppointment.doctor.extension}` : ""}`.trim()
+    : "";
+
+  /** Merge the global User identity into the patient profile 
+   * so the PatientInfoCard component has access to the names and avatar! */
+  const mergedPatientProfile = patientProfile ? {
+    ...patientProfile,
+    name: `${dbUser?.firstName || ""} ${dbUser?.lastName || ""}`.trim(), 
+    firstName: dbUser?.firstName,
+    lastName: dbUser?.lastName,
+    profilePicture: dbUser?.profilePicture,
+  } : null;
+
   // Dynamic Time-based Greeting
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
@@ -68,7 +83,7 @@ export default async function PatientDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         
         {/* 1. UP NEXT HERO CARD (Spans 2 columns) */}
-        <Card className="col-span-1 lg:col-span-2 border-none bg-gradient-to-br from-[#1E3A5F] via-[#2A528A] to-[#1E3A5F] shadow-lg rounded-3xl relative overflow-hidden text-white flex flex-col justify-between">
+        <Card className="col-span-1 lg:col-span-2 border-none bg-linear-to-br from-[#1E3A5F] via-[#2A528A] to-[#1E3A5F] shadow-lg rounded-3xl relative overflow-hidden text-white flex flex-col justify-between">
           {/* Decorative ambient blurs */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#6FAEE7]/20 rounded-full blur-3xl pointer-events-none translate-y-1/4 -translate-x-1/4" />
@@ -85,7 +100,8 @@ export default async function PatientDashboard() {
                 <div className="space-y-3">
                   <h3 className="font-extrabold text-3xl md:text-4xl leading-tight">
                     Consultation with <br/> 
-                    <span className="text-[#6FAEE7]">{nextAppointment.doctor.name}</span>
+                    {/* Inject the assembled doctorName variable */}
+                    <span className="text-[#6FAEE7]">{doctorName}</span>
                   </h3>
                   <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-white/80">
                     <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-lg backdrop-blur-sm">
@@ -159,10 +175,11 @@ export default async function PatientDashboard() {
         </div>
 
         {/* 4. PATIENT INFO / EMR SUMMARY */}
-        {patientProfile && (
+        {mergedPatientProfile && (
           <div className="col-span-1 lg:col-span-2">
             <div className="h-full rounded-3xl overflow-hidden shadow-sm">
-              <PatientInfoCard profile={patientProfile} />
+              {/* Pass the merged object down so the component receives the names/avatar */}
+              <PatientInfoCard profile={mergedPatientProfile as any} />
             </div>
           </div>
         )}

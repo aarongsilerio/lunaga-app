@@ -49,19 +49,21 @@ export async function POST(req: Request) {
     const { id, email_addresses, first_name, last_name, image_url } = evt.data;
 
     const email = email_addresses[0]?.email_address;
-    const firstName = first_name || 'Patient';
+    const firstName = first_name || '';
     const lastName = last_name || '';
+    const profilePicture = image_url || '';
+    const role = 'PATIENT'; 
 
     try {
       // Inside your user.created event block:
       await prisma.user.create({
         data: {
-          id: id, // Changed from clerkId: id
+          id: id,
           email: email,
           firstName: firstName,
           lastName: lastName,
-          profileImage: image_url,
-          role: 'PATIENT', 
+          profilePicture: profilePicture,
+          role: role, 
         },
       });
 

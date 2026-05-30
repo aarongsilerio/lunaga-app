@@ -30,7 +30,7 @@ export function LunaRoom({ roomName, userName, userEmail, isDoctor, returnUrl }:
   const router = useRouter();
 
   return (
-    <div className="w-full h-[75vh] min-h-[600px] rounded-3xl overflow-hidden border border-[#6FAEE7]/20 shadow-2xl bg-black">
+    <div className="w-full h-[75vh] min-h-150 rounded-3xl overflow-hidden border border-[#6FAEE7]/20 shadow-2xl bg-black">
       <JitsiMeeting
         domain="meet.jit.si" // Uses Jitsi's free, high-tier public servers
         roomName={`Lunaga-Consultation-${roomName}`}
@@ -48,7 +48,7 @@ export function LunaRoom({ roomName, userName, userEmail, isDoctor, returnUrl }:
           ],
         }}
         userInfo={{
-          displayName: isDoctor ? `Dr. ${userName}` : userName,
+          displayName: userName,
           email: userEmail,
         }}
         getIFrameRef={(iframeRef) => {

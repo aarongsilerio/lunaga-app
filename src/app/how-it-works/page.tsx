@@ -55,9 +55,9 @@ export default function HowItWorksPage() {
       {/* AMBIENT BACKGROUND GLOWS */}
       {/* ========================================== */}
       <div className="absolute top-0 -z-10 h-full w-full bg-[#F7FAFC]">
-        <div className="absolute top-0 left-1/2 h-[600px] w-[800px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-[#6FAEE7]/20 opacity-50 blur-[120px]"></div>
-        <div className="absolute top-[40%] right-0 h-[500px] w-[500px] translate-x-1/4 rounded-full bg-[#8ED8C3]/20 opacity-40 blur-[100px]"></div>
-        <div className="absolute bottom-0 left-0 h-[600px] w-[600px] -translate-x-1/4 translate-y-1/4 rounded-full bg-[#C6B7FF]/20 opacity-40 blur-[100px]"></div>
+        <div className="absolute top-0 left-1/2 h-150 w-150 -translate-x-1/2 -translate-y-1/4 rounded-full bg-[#6FAEE7]/20 opacity-50 blur-[120px]"></div>
+        <div className="absolute top-[40%] right-0 h-125 w-125 translate-x-1/4 rounded-full bg-[#8ED8C3]/20 opacity-40 blur-[100px]"></div>
+        <div className="absolute bottom-0 left-0 h-150 w-150 -translate-x-1/4 translate-y-1/4 rounded-full bg-[#C6B7FF]/20 opacity-40 blur-[100px]"></div>
       </div>
 
       {/* ========================================== */}
@@ -115,7 +115,7 @@ export default function HowItWorksPage() {
                 {/* Abstract Visual / Image Placeholder */}
                 {/* In a real production app, you would replace this div with actual app screenshots */}
                 <div className="flex-1 w-full max-w-xl">
-                  <div className={`aspect-[4/3] rounded-3xl shadow-xl border border-white/50 relative overflow-hidden ${step.imagePlaceholder} flex items-center justify-center group`}>
+                  <div className={`aspect-4/3 rounded-3xl shadow-xl border border-white/50 relative overflow-hidden ${step.imagePlaceholder} flex items-center justify-center group`}>
                     
                     {/* Glassmorphism Mockup Element */}
                     <div className="absolute inset-x-8 bottom-0 h-3/4 bg-white/40 backdrop-blur-md border-t border-x border-white/60 rounded-t-2xl shadow-2xl transition-transform duration-700 group-hover:translate-y-2 flex flex-col p-6">

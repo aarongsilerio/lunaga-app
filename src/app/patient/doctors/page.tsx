@@ -4,19 +4,25 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client"; 
 import { DoctorDirectory } from "@/components/discovery/doctor-directory";
 
-// Dynamically generate the exact type based on our Prisma query
+// Extend the Prisma payload type to officially support our merged Identity fields
+// This ensures your DoctorDirectory client component doesn't throw TypeScript errors!
 export type DoctorWithUser = Prisma.DoctorProfileGetPayload<{
   include: { user: true };
-}>;
+}> & {
+  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  profilePicture: string | null;
+};
 
 export default async function DoctorDiscoveryPage() {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
-  let doctors: DoctorWithUser[] = [];
+  let formattedDoctors: DoctorWithUser[] = [];
   
   try {
-    doctors = await prisma.doctorProfile.findMany({
+    const rawDoctors = await prisma.doctorProfile.findMany({
       where: {
         user: {
           isApproved: true,
@@ -30,6 +36,16 @@ export default async function DoctorDiscoveryPage() {
         rating: "desc", 
       },
     });
+
+    // Intercept the raw database data and dynamically generate the 'name' field
+    formattedDoctors = rawDoctors.map((doc) => ({
+      ...doc,
+      name: `${doc.title || ""} ${doc.user?.firstName || ""} ${doc.user?.lastName || ""}${doc.extension ? `, ${doc.extension}` : ""}`.trim(),
+      firstName: doc.user?.firstName || null,
+      lastName: doc.user?.lastName || null,
+      profilePicture: doc.user?.profilePicture || null,
+    }));
+
   } catch (error) {
     console.error("[Doctor Fetch Error]:", error);
   }
@@ -37,8 +53,8 @@ export default async function DoctorDiscoveryPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in duration-700">
       
-      {/* Sophisticated Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1E3A5F] via-[#2A528A] to-[#1E3A5F] p-8 md:p-12 shadow-lg">
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-[#1E3A5F] via-[#2A528A] to-[#1E3A5F] p-8 md:p-12 shadow-lg">
         {/* Decorative background blur */}
         <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/4">
           <div className="h-64 w-64 rounded-full bg-[#6FAEE7] opacity-20 blur-3xl"></div>
@@ -58,7 +74,7 @@ export default async function DoctorDiscoveryPage() {
       </div>
 
       {/* Directory Component */}
-      <DoctorDirectory initialDoctors={doctors} />
+      <DoctorDirectory initialDoctors={formattedDoctors} />
     </div>
   );
 }

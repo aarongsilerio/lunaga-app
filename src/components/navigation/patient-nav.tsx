@@ -62,7 +62,7 @@ export function PatientNav() {
       {/* MOBILE TOP BAR (Visible only on small screens) */}
       {/* ========================================== */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-md border-b border-[#6FAEE7]/20 z-40 flex items-center justify-between px-6 shadow-sm">
-        <Image src="/nav-logo.png" alt="Lunága" width={110} height={32} className="w-[110px] h-auto" priority />
+        <Image src="/nav-logo.png" alt="Lunága" width={110} height={32} className="w-27.5 h-auto" priority />
         <div className="flex items-center gap-4">
           <ClerkLoading>
             <div className="w-7 h-7 rounded-full bg-[#1E3A5F]/10 animate-pulse" />

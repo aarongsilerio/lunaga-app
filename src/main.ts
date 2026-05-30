@@ -1,55 +1,71 @@
 import { prisma } from './db'
 
 async function main() {
-  // 1. CREATE: Create a User and their PatientProfile simultaneously
+  // 1. CREATE: Create a User, PatientProfile, and MedicalRecord simultaneously
   const newUser = await prisma.user.create({
     data: {
+      id: `mock_clerk_id_${Date.now()}`, // We mock a string ID since Clerk handles real auth
       email: `alice-${Date.now()}@example.com`,
-      password: 'hashed_secure_password_123', // Required by your schema
       role: 'PATIENT',
+      firstName: 'Alice',  // <-- Identity fields live on the User table now
+      lastName: 'Smith',
       patientProfile: {
         create: {
-          name: 'Alice',
-          birthday: new Date('1995-05-15T00:00:00Z'), // Required by your schema
-          weight: 60.5,
-          height: 165.0,
+          birthday: new Date('1995-05-15T00:00:00Z'),
+          sex: 'Female', 
+          medicalRecord: { // <-- Clinical fields live in the nested MedicalRecord table
+            create: {
+              weight: 60.5,
+              height: 165.0,
+            },
+          },
         },
       },
     },
-    // Include the profile in the return object so we can see it
+    // Include the nested relations so we can see them in the console log
     include: {
-      patientProfile: true, 
+      patientProfile: {
+        include: { medicalRecord: true }
+      }, 
     },
   })
   console.log('Created user with profile:', newUser)
 
-  // 2. READ: Fetch the user and include their related profile data
+  // 2. READ: Fetch the user and include their nested profile and medical data
   const foundUser = await prisma.user.findUnique({ 
     where: { id: newUser.id },
     include: {
-      patientProfile: true,
+      patientProfile: {
+        include: { medicalRecord: true }
+      },
     }
   })
   console.log('\nFound user:', foundUser)
 
-  // 3. UPDATE: Update the nested PatientProfile name
+  // 3. UPDATE: Update the Identity and Nested Records
   const updatedUser = await prisma.user.update({
     where: { id: newUser.id },
     data: { 
+      lastName: 'Johnson', // <-- Name updates happen on the User table directly!
       patientProfile: {
         update: {
-          name: 'Alice Smith',
+          medicalRecord: {
+            update: {
+              weight: 61.0 // <-- Vitals update on the MedicalRecord table
+            }
+          }
         }
       }
     },
     include: {
-      patientProfile: true,
+      patientProfile: {
+        include: { medicalRecord: true }
+      },
     }
   })
-  console.log('\nUpdated user profile name:', updatedUser)
+  console.log('\nUpdated user profile:', updatedUser)
 
-  // 4. DELETE: Deleting the User will cascade and delete the PatientProfile automatically
-  // (Because of `onDelete: Cascade` in your schema)
+  // 4. DELETE: Deleting the User will cascade and delete the PatientProfile and MedicalRecord automatically
   await prisma.user.delete({ 
     where: { id: newUser.id } 
   })

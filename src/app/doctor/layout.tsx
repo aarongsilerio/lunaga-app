@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { ShieldAlert, LogOut } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { DoctorNav } from "@/components/navigation/doctor-nav";
 
@@ -22,11 +22,11 @@ export default async function DoctorLayout({
 
   // 3. Routing Rules
   if (!dbUser || !dbUser.doctorProfile) {
-    redirect("/onboarding/doctor"); // Needs to build profile
+    redirect("/onboarding/doctor");
   }
 
   if (dbUser.role === "PATIENT") {
-    redirect("/patient/dashboard"); // Wrong portal
+    redirect("/patient/dashboard"); 
   }
 
   // 4. THE APPROVAL GATE

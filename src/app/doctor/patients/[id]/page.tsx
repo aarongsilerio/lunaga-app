@@ -28,6 +28,7 @@ export default async function PatientEMRPage({ params }: { params: Promise<{ id:
   const patient = await prisma.patientProfile.findUnique({
     where: { id: patientId },
     include: {
+      user: true, // FIX 1: Explicitly include the base User table to get the names
       medicalRecord: true,
       appointments: {
         where: { doctorId: doctorId, status: "COMPLETED" }, // Only show finalized records
@@ -45,6 +46,10 @@ export default async function PatientEMRPage({ params }: { params: Promise<{ id:
   });
   if (!relationshipCheck) redirect("/doctor/patients?error=Unauthorized");
 
+  // FIX 2: Construct the full name safely
+  const patientFullName = `${patient.user?.firstName || "Unknown"} ${patient.user?.lastName || ""}`.trim();
+  const patientInitial = patient.user?.firstName?.charAt(0) || "P";
+
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12">
       
@@ -61,10 +66,12 @@ export default async function PatientEMRPage({ params }: { params: Promise<{ id:
         
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative z-10">
           <div className="w-24 h-24 rounded-full bg-white text-[#1E3A5F] flex items-center justify-center font-bold text-4xl shrink-0 shadow-inner">
-            {patient.name.charAt(0)}
+            {/* FIX 3: Inject the safe initial */}
+            {patientInitial}
           </div>
           <div className="flex-1">
-            <h1 className="text-3xl font-extrabold">{patient.name}</h1>
+            {/* FIX 4: Inject the full constructed name */}
+            <h1 className="text-3xl font-extrabold">{patientFullName}</h1>
             <p className="text-white/70 font-medium mt-1 text-sm tracking-widest uppercase">
               Patient ID: {patient.id.toString().padStart(6, '0')}
             </p>

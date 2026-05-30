@@ -83,10 +83,15 @@ export async function POST(req: Request) {
           const call = result.functionCalls[0];
           
           if (call.name === "findDoctors") {
+            if (!call.args || !call.args.specialty) {
+              throw new Error("AI function call 'findDoctors' was invoked without a valid specialty argument.");
+            }
+
             const specialty = call.args.specialty as string;
             console.log(`[LunaMatch] AI searching database for: ${specialty}`);
             
-            const doctors = await prisma.doctorProfile.findMany({
+            // FIX 1: Update the query to fetch the nested User and Title data
+            const rawDoctors = await prisma.doctorProfile.findMany({
               where: {
                 user: { isApproved: true },
                 OR: [
@@ -94,9 +99,29 @@ export async function POST(req: Request) {
                   { subSpecializations: { hasSome: [specialty] } },
                 ],
               },
-              select: { id: true, name: true, specialization: true, rating: true },
+              select: { 
+                id: true, 
+                title: true,
+                extension: true,
+                specialization: true, 
+                rating: true,
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              },
               take: 3,
             });
+
+            // FIX 2: Map the raw data into a clean format for the LLM to consume easily
+            const doctors = rawDoctors.map(doc => ({
+              id: doc.id,
+              name: `${doc.title || ""} ${doc.user?.firstName} ${doc.user?.lastName}${doc.extension ? `, ${doc.extension}` : ""}`.trim(),
+              specialization: doc.specialization,
+              rating: doc.rating
+            }));
 
             console.log(`[LunaMatch] Found ${doctors.length} doctors.`);
 

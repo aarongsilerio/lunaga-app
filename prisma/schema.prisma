@@ -37,6 +37,9 @@ model User {
   id              String    @id
   email           String    @unique
   role            Role      @default(PATIENT)
+  firstName      String?  
+  lastName       String?
+  profilePicture   String?
   isApproved      Boolean   @default(false)
   createdByAdmin  Boolean   @default(false)
   lastLoginAt     DateTime? @db.Timestamptz
@@ -56,13 +59,11 @@ model User {
 model PatientProfile {
   id       Int    @id @default(autoincrement())
   userId   String @unique 
-  name             String
   birthday         DateTime @db.Timestamptz
   sex              String?
   contactNumber    String?
   address          String?
   occupation       String?
-  profilePicture   String?
   
   medicalRecord    MedicalRecord?
 
@@ -96,9 +97,10 @@ model MedicalRecord {
 model DoctorProfile {
   id       Int    @id @default(autoincrement())
   userId   String @unique 
-  name               String
+
+  title             String?    @default("Dr.")
+  extension         String?    @default("MD")
   gender             String?
-  profilePicture     String?
   
   // Professional Details
   specialization     String

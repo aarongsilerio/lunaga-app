@@ -112,9 +112,16 @@ export function PatientOnboardingForm() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
-              <Input id="name" name="name" required defaultValue={`${clerkUser?.firstName || ""} ${clerkUser?.lastName || ""}`.trim()} className="h-12 border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]" />
+            {/* FIX 1: Split Name into First and Last Name */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
+                <Input id="firstName" name="firstName" required defaultValue={clerkUser?.firstName || ""} className="h-12 border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
+                <Input id="lastName" name="lastName" required defaultValue={clerkUser?.lastName || ""} className="h-12 border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]" />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -126,6 +133,20 @@ export function PatientOnboardingForm() {
                 <Label htmlFor="contactNumber">Contact Number <span className="text-red-500">*</span></Label>
                 <Input id="contactNumber" name="contactNumber" value={contactNumber} onChange={handleContactChange} required placeholder="+639..." className="h-12 border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]" />
               </div>
+            </div>
+
+            {/* FIX 2: Added the missing Sex field required by the database */}
+            <div className="space-y-2">
+              <Label htmlFor="sex">Biological Sex <span className="text-red-500">*</span></Label>
+              <Select name="sex" required>
+                <SelectTrigger className="h-12 border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]">
+                  <SelectValue placeholder="Select..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Button type="button" onClick={nextStep} className="w-full h-12 mt-4 rounded-xl bg-[#1E3A5F] hover:bg-[#1E3A5F]/90 text-white font-medium text-lg">
@@ -174,7 +195,7 @@ export function PatientOnboardingForm() {
 
             <div className="space-y-2">
               <Label htmlFor="pastMedicalHistory">Basic Medical History <span className="text-red-500">*</span></Label>
-              <Textarea id="pastMedicalHistory" name="pastMedicalHistory" required placeholder="Briefly describe any chronic conditions or major past illnesses (Type 'None' if NA)" className="min-h-[100px] border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]" />
+              <Textarea id="pastMedicalHistory" name="pastMedicalHistory" required placeholder="Briefly describe any chronic conditions or major past illnesses (Type 'None' if NA)" className="min-h-25 border-[#6FAEE7]/30 rounded-xl bg-[#F7FAFC]" />
             </div>
 
             {error && <p className="text-sm font-medium text-red-500 bg-red-50 p-3 rounded-lg">{error}</p>}

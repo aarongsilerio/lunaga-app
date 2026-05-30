@@ -103,11 +103,13 @@ export function ScheduleClient({ userId, appointments, profile }: ScheduleClient
             <Card key={appt.id} className={`p-6 border shadow-sm rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all ${appt.status === "CANCELLED" ? "opacity-60 border-gray-100 bg-gray-50" : "bg-white border-[#6FAEE7]/20 hover:border-[#6FAEE7]/50"}`}>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#1E3A5F]/5 flex items-center justify-center text-[#1E3A5F] font-bold text-xl shrink-0">
-                  {appt.patient.name.charAt(0)}
+                  {/* FIX 1: Safely fall back to "P" if the patient name is missing */}
+                  {(appt.patient?.name || "P").charAt(0)}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-bold text-[#1E3A5F]">{appt.patient.name}</h3>
+                    {/* FIX 2: Provide a safe fallback string for the display name */}
+                    <h3 className="text-lg font-bold text-[#1E3A5F]">{appt.patient?.name || "Unknown Patient"}</h3>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${appt.status === "SCHEDULED" || appt.status === "RESCHEDULED" ? "bg-blue-50 text-blue-700" : "bg-gray-200 text-gray-700"}`}>
                       {appt.status}
                     </span>
@@ -156,7 +158,7 @@ export function ScheduleClient({ userId, appointments, profile }: ScheduleClient
                 <label className="text-xs font-bold uppercase tracking-wider text-[#1E3A5F]/70">Working Days</label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {DAYS_OF_WEEK.map((day) => (
-                    <label key={day} className="flex items-center gap-2 p-2.5 rounded-xl border border-[#6FAEE7]/20 bg-white hover:bg-[#F7FAFC] cursor-pointer transition-colors has-[:checked]:bg-[#1E3A5F] has-[:checked]:text-white has-[:checked]:border-[#1E3A5F]">
+                    <label key={day} className="flex items-center gap-2 p-2.5 rounded-xl border border-[#6FAEE7]/20 bg-white hover:bg-[#F7FAFC] cursor-pointer transition-colors has-checked:bg-[#1E3A5F] has-checked:text-white has-checked:border-[#1E3A5F]">
                       <input type="checkbox" name="clinicDays" value={day} defaultChecked={profile.clinicDays.includes(day)} className="hidden" />
                       <CheckSquare className="w-4 h-4 opacity-70" />
                       <span className="text-sm font-semibold">{day.slice(0, 3)}</span>
@@ -173,7 +175,7 @@ export function ScheduleClient({ userId, appointments, profile }: ScheduleClient
                 </div>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                   {ALL_TIME_SLOTS.map((timeFloat) => (
-                    <label key={timeFloat} className="flex flex-col items-center justify-center p-2 rounded-xl border border-[#6FAEE7]/20 bg-white hover:bg-[#F7FAFC] cursor-pointer transition-colors has-[:checked]:bg-[#6FAEE7] has-[:checked]:text-white has-[:checked]:border-[#6FAEE7] has-[:checked]:shadow-sm text-[#1E3A5F]">
+                    <label key={timeFloat} className="flex flex-col items-center justify-center p-2 rounded-xl border border-[#6FAEE7]/20 bg-white hover:bg-[#F7FAFC] cursor-pointer transition-colors has-checked:bg-[#6FAEE7] has-checked:text-white has-checked:border-[#6FAEE7] has-checked:shadow-sm text-[#1E3A5F]">
                       <input type="checkbox" name="availability" value={timeFloat} defaultChecked={profile.availability.includes(timeFloat)} className="hidden" />
                       <span className="text-sm font-semibold">{formatTime(timeFloat)}</span>
                     </label>

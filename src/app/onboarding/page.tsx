@@ -15,8 +15,8 @@ export default async function OnboardingPage() {
     include: { patientProfile: true },
   });
 
-  // If the profile exists and has a name, they've already onboarded.
-  if (dbUser?.patientProfile?.name) {
+  // If the profile object exists at all, they have successfully onboarded!
+  if (dbUser?.patientProfile) {
     redirect("/patient/dashboard");
   }
 

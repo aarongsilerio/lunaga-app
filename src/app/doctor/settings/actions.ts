@@ -9,8 +9,13 @@ export async function updateDoctorProfile(formData: FormData) {
     const user = await currentUser();
     if (!user) throw new Error("Unauthorized");
 
-    // 1. Extract Standard Fields
-    const name = formData.get("name") as string;
+    // FIX 1: Extract the new Identity and Honorific fields instead of the single "name"
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const title = formData.get("title") as string;
+    const extension = formData.get("extension") as string;
+    
+    // Extract Standard Fields
     const gender = formData.get("gender") as string;
     const specialization = formData.get("specialization") as string;
     const bio = formData.get("bio") as string;
@@ -27,8 +32,9 @@ export async function updateDoctorProfile(formData: FormData) {
     const subSpecializations = parseArray("subSpecializations");
     const hmoAccreditations = parseArray("hmoAccreditations");
 
-    if (!name || !specialization) {
-      return { error: "Name and Primary Specialization are required." };
+    // FIX 2: Update validation to check for first and last name
+    if (!firstName || !lastName || !specialization) {
+      return { error: "First Name, Last Name, and Primary Specialization are required." };
     }
     if (clinicDays.length === 0) {
       return { error: "You must select at least one available clinic day." };
@@ -57,11 +63,24 @@ export async function updateDoctorProfile(formData: FormData) {
       }
     }
 
-    // 4. Update the Database Profile
+    // FIX 3: Dual Database Update Strategy (Single Source of Truth)
+    
+    // Update A: The Global User Identity
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        firstName,
+        lastName,
+        ...(profilePictureUrl && { profilePicture: profilePictureUrl }),
+      }
+    });
+
+    // Update B: The Professional Profile
     await prisma.doctorProfile.update({
       where: { userId: user.id },
       data: {
-        name,
+        title,
+        extension,
         gender,
         specialization,
         subSpecializations,
@@ -71,7 +90,6 @@ export async function updateDoctorProfile(formData: FormData) {
         roomNumber,
         clinicDays,
         clinicHours,
-        ...(profilePictureUrl && { profilePicture: profilePictureUrl }),
       }
     });
 
