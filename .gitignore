@@ -42,9 +42,4 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# future routes
-/src/(auth)
-/src/admin
-/src/lunaroom
-/components/patient
-/components/shared
+
