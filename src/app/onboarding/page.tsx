@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PatientOnboardingForm } from "@/components/onboarding/patient-onboarding-form";
 import Image from "next/image";
+import { LegalFooter } from "@/components/legal/LegalFooter";
 
 export default async function OnboardingPage() {
   const user = await currentUser();
@@ -35,7 +36,9 @@ export default async function OnboardingPage() {
       <div className="w-full max-w-2xl animate-in fade-in zoom-in-95 duration-700 delay-150">
         <PatientOnboardingForm />
       </div>
-
+      <div className="absolute bottom-0 w-full pb-4">
+        <LegalFooter />
+      </div>
     </div>
   );
 }

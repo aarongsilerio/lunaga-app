@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, ClerkLoading, ClerkLoaded } from "@clerk/nextjs";
 import { LayoutDashboard, Stethoscope, HeartPulse, Settings, Search, Menu, X } from "lucide-react";
 import Image from "next/image";
 
@@ -64,9 +64,13 @@ export function PatientNav() {
       <div className="md:hidden fixed top-0 left-0 right-0 h-20 bg-white/80 backdrop-blur-md border-b border-[#6FAEE7]/20 z-40 flex items-center justify-between px-6 shadow-sm">
         <Image src="/nav-logo.png" alt="Lunága" width={110} height={32} className="w-[110px] h-auto" priority />
         <div className="flex items-center gap-4">
-          
+          <ClerkLoading>
+            <div className="w-7 h-7 rounded-full bg-[#1E3A5F]/10 animate-pulse" />
+          </ClerkLoading>
           {/* FIX 1: Removed the outdated prop for Clerk v5+ compatibility */}
-          <UserButton />
+          <ClerkLoaded>
+            <UserButton />
+          </ClerkLoaded>
           
           {/* FIX 2: Added aria-label and title for full accessibility compliance */}
           <button 
@@ -98,6 +102,7 @@ export function PatientNav() {
         }`}
       >
         <div className="flex items-center justify-between mb-2">
+          
           <span className="text-sm font-bold text-[#6FAEE7] uppercase tracking-wider">Menu</span>
           
           {/* FIX 3: Added aria-label and title for accessibility */}
@@ -117,7 +122,7 @@ export function PatientNav() {
       {/* DESKTOP SIDEBAR (Visible only on medium+ screens) */}
       {/* ========================================== */}
       <aside className="hidden md:flex flex-col w-72 fixed inset-y-0 left-0 bg-white border-r border-[#6FAEE7]/10 shadow-[4px_0_24px_rgba(111,174,231,0.05)] z-40 p-6">
-        <div className="mb-10 pl-2">
+        <div className="mb-5 pl-2">
           <Image 
             src="/nav-logo.png" 
             alt="Lunága" 
@@ -138,8 +143,13 @@ export function PatientNav() {
 
         <div className="mt-auto pt-6 border-t border-[#6FAEE7]/10 flex items-center gap-3 px-4">
           
-          {/* FIX 4: Removed the outdated prop for Clerk v5+ compatibility */}
-          <UserButton />
+          {/* FIX: Explicit loading states prevent hydration mismatch */}
+          <ClerkLoading>
+            <div className="w-7 h-7 rounded-full bg-[#1E3A5F]/10 animate-pulse" />
+          </ClerkLoading>
+          <ClerkLoaded>
+            <UserButton />
+          </ClerkLoaded>
           
           <span className="text-sm font-semibold text-[#1E3A5F]">My Account</span>
         </div>

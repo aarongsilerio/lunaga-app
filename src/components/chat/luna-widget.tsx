@@ -99,7 +99,7 @@ export function LunaWidget() {
           {/* Header */}
           <div className="bg-[#1E3A5F] p-4 flex items-center justify-between text-white shrink-0">
             <div className="flex items-center gap-2 font-semibold">
-              <Moon className="w-5 h-5 text-[#6FAEE7]" /> LunaMatch
+              <Moon className="w-5 h-5 text-[#6FAEE7]" /> Chat with Luna
             </div>
             <div className="flex items-center gap-1">
               {/* Expand to Full Page Button */}

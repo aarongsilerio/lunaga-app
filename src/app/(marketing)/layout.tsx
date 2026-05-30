@@ -46,7 +46,7 @@ export default function MarketingLayout({
 
             {/* Displayed only when the user IS logged in */}
             <Show when="signed-in">
-              <Link href="/patient/dashboard">
+              <Link href="/dashboard">
                 <Button variant="outline" className="mr-2 rounded-full border-[#6FAEE7]/30 text-[#1E3A5F] hover:bg-[#6FAEE7]/10">
                   Go to Dashboard
                 </Button>
@@ -62,11 +62,11 @@ export default function MarketingLayout({
       <main className="flex-1">{children}</main>
 
       {/* FOOTER */}
-      <footer className="border-t border-[#6FAEE7]/20 bg-white py-8">
+      {/* <footer className=" border-[#6FAEE7]/20 bg-white py-8">
         <div className="container mx-auto px-6 text-center text-sm text-[#1E3A5F]/60 md:px-12">
           <p>© {new Date().getFullYear()} Lunága. <span className="italic">Care, Wherever You Are.</span></p>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 }

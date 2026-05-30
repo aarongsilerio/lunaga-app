@@ -20,7 +20,7 @@ export default async function PatientProfilePage() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-700">
       <div>
         <h1 className="text-3xl font-bold text-[#1E3A5F]">Your Settings</h1>
         <p className="text-[#1E3A5F]/70 mt-2">

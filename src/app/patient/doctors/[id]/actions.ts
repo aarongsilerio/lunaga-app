@@ -45,12 +45,12 @@ export async function bookAppointment(formData: FormData) {
       data: {
         patientId: dbUser.patientProfile.id,
         doctorId: doctorId,
-        datetime: appointmentDate,
+        datetime: new Date("2026-06-08T03:00:00.000Z"), 
         status: "SCHEDULED",
-        notes: notes || null,
-      },
-    });
-
+        
+        reason: null, 
+      }
+    })
     // 5. Generate Real-Time Notification for the Doctor
     const doctor = await prisma.doctorProfile.findUnique({ where: { id: doctorId } });
     if (doctor) {
@@ -58,7 +58,9 @@ export async function bookAppointment(formData: FormData) {
         data: {
           userId: doctor.userId,
           message: `New appointment scheduled with ${dbUser.patientProfile.name} on ${appointmentDate.toLocaleDateString()} at ${appointmentDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}.`,
-          read: false,
+          isRead: false,
+          title: "New Appointment Scheduled",
+          type: "BOOKING"
         },
       });
     }
