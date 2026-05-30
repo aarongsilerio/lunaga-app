@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     // 1. Create the Appointment
     const appointment = await prisma.appointment.create({
-      data: { doctorId, patientId, datetime: new Date(date), timeSlot, reason },
+      data: { doctorId, patientId, datetime: new Date(date), reason },
       include: { patient: true, doctor: { include: { user: true } } }
     });
 
